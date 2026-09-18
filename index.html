@@ -36,6 +36,10 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 .upload-fab .plus{font-size:17px;line-height:1;color:#9b7cff}
 
 @media(max-width:760px){.grid,.admin-grid{grid-template-columns:1fr}.hero{padding-top:50px}.hero h1{font-size:38px}.nav{align-items:flex-start}.navlinks{gap:10px}}
+
+.logout-fab{position:fixed;left:18px;bottom:18px;z-index:1000;border:0;border-radius:999px;padding:11px 16px;background:#222;color:#fff;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.22)}
+.logout-fab:hover{transform:translateY(-1px)}
+.logout-fab.hidden{display:none}
 </style>
 </head>
 <body>
@@ -43,6 +47,7 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
   <div class="logo"><span>migo</span> store</div>
   <nav class="navlinks"><a href="#home">الرئيسية</a><a href="#apps">التطبيقات</a><a href="#account" id="accountNav">الحساب</a><a href="#upload">رفع تطبيق</a></nav>
 </div></header>
+<button class="logout-fab hidden" id="logoutFab" type="button" onclick="signOutLocal()">↪ تسجيل الخروج</button>
 <button class="upload-fab" id="uploadFab" type="button" onclick="openUpload()">
   <span class="plus">+</span><span>رفع تطبيق</span>
 </button>
@@ -190,6 +195,7 @@ window.signOutLocal=async()=>{
  const btn=document.querySelector('#userBox .ghost'); if(btn) btn.disabled=true;
  try{
   await signOut(auth); currentUser=null; isAdmin=false;
+  $("logoutFab").classList.add("hidden");
   $("userBox").classList.remove("show"); $("account").classList.remove("hidden"); $("accountNav").classList.remove("hidden");
   $("upload").classList.add("hidden"); $("uploadFab").classList.remove("show"); $("myAppsSection").classList.add("hidden"); $("admin").classList.add("hidden"); $("adminBadge").classList.add("hidden");
   status("تم تسجيل الخروج بنجاح.");
@@ -197,6 +203,7 @@ window.signOutLocal=async()=>{
 };
 
 function renderUser(user,data){
+ $("logoutFab").classList.remove("hidden");
  $("userBox").classList.add("show");
  $("userEmail").textContent=(user.displayName||"")+" — "+user.email;
  isAdmin=(user.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
@@ -336,6 +343,7 @@ getRedirectResult(auth).then(result=>{
 onAuthStateChanged(auth,async user=>{
  currentUser=user;
  if(!user){
+   $("logoutFab").classList.add("hidden");
    $("userBox").classList.remove("show");
    $("adminBadge").classList.add("hidden");
    $("upload").classList.add("hidden");
