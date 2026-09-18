@@ -13,6 +13,28 @@ main{max-width:1100px;margin:auto;padding:0 20px}.hero{text-align:center;padding
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.card,.panel{background:#10141b;border:1px solid #202833;border-radius:18px;padding:18px}.app-top{display:flex;gap:14px;align-items:center}.app-icon{width:74px;height:74px;border-radius:17px;object-fit:cover;background:#171d26;border:1px solid #29313c}.app-name{margin:0 0 7px;font-size:19px}.app-desc{margin:0;color:#a6afbb;line-height:1.7;font-size:13px}.app-meta{margin-top:13px;color:#7f8a99;font-size:12px}.btn{border:0;border-radius:12px;padding:11px 15px;cursor:pointer;font-weight:700;font-size:14px}.primary{background:#9b7cff;color:#fff}.danger{background:#3a1518;color:#ff9b9b}.success{background:#153622;color:#8ce0a7}.ghost{background:#1a2029;color:#e8edf3}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.empty{text-align:center;color:#8e98a6;padding:35px}.auth-wrap{max-width:650px;margin:auto}.auth-card{background:#10141b;border:1px solid #202833;border-radius:18px;padding:22px}.auth-card h2{margin:0 0 8px}.auth-card>p{color:#9ba5b2;line-height:1.7;font-size:14px}.google-btn{width:100%;display:flex;justify-content:center;align-items:center;gap:10px;padding:13px;border-radius:12px;border:1px solid #c8cdd5;background:#fff;color:#202124;font-weight:700;cursor:pointer}.google-icon{width:20px;height:20px}.status{min-height:22px;margin-top:12px;color:#a9b3c0;font-size:13px}.user-box{display:none;margin-top:14px;padding:14px;border-radius:14px;background:#0c1117;border:1px solid #222c37}.user-box.show{display:block}.admin-badge{display:inline-block;margin-top:8px;padding:5px 9px;border-radius:999px;background:#162a20;color:#79dfa1;font-size:12px}
 .form{display:grid;gap:12px}.field{display:grid;gap:7px}.field label{font-size:13px;color:#b9c2cd}.field input,.field textarea,.field select{width:100%;padding:12px;border-radius:11px;border:1px solid #29323e;background:#0b1016;color:#fff;outline:none}.field textarea{min-height:110px;resize:vertical}.field small{color:#7e8997;font-size:11px}.upload-box{border:1px dashed #394352;border-radius:13px;padding:14px;background:#0c1117}.progress{height:7px;background:#1b222c;border-radius:10px;overflow:hidden;margin-top:8px}.progress>div{height:100%;width:0;background:#9b7cff;transition:width .2s}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.list{display:grid;gap:10px;margin-top:12px}.row{padding:12px;border:1px solid #252e39;border-radius:12px;background:#0d1218}.row-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.tag{font-size:11px;padding:4px 8px;border-radius:999px;background:#222a35;color:#b9c2cf}.tag.pending{color:#ffd28a}.tag.approved{color:#8ce0a7}.tag.rejected{color:#ff9d9d}.row small{display:block;color:#7f8a98;margin-top:6px}.hidden{display:none!important}
 footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1d232d;margin-top:30px}
+.upload-fab{
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  z-index:30;
+  display:none;
+  align-items:center;
+  gap:7px;
+  padding:10px 13px;
+  border:1px solid #2b3340;
+  border-radius:999px;
+  background:#10141b;
+  color:#fff;
+  box-shadow:0 8px 30px rgba(0,0,0,.35);
+  cursor:pointer;
+  font-size:12px;
+  font-weight:700;
+}
+.upload-fab.show{display:flex}
+.upload-fab:hover{background:#171d26}
+.upload-fab .plus{font-size:17px;line-height:1;color:#9b7cff}
+
 @media(max-width:760px){.grid,.admin-grid{grid-template-columns:1fr}.hero{padding-top:50px}.hero h1{font-size:38px}.nav{align-items:flex-start}.navlinks{gap:10px}}
 </style>
 </head>
@@ -21,6 +43,9 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
   <div class="logo"><span>migo</span> store</div>
   <nav class="navlinks"><a href="#home">الرئيسية</a><a href="#apps">التطبيقات</a><a href="#account">الحساب</a><a href="#upload">رفع تطبيق</a></nav>
 </div></header>
+<button class="upload-fab" id="uploadFab" type="button" onclick="openUpload()">
+  <span class="plus">+</span><span>رفع تطبيق</span>
+</button>
 
 <main id="home">
 <section class="hero"><h1><span>migo</span> store</h1><p>تطبيقات وألعاب مجانية، يرفعها المستخدمون وتُنشر بعد مراجعة الإدارة.</p></section>
@@ -56,7 +81,7 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
       <div class="field"><label>الإصدار</label><input id="appVersion" maxlength="30" placeholder="مثال: 1.0.0"></div>
       <div class="field"><label>التصنيف</label><select id="appCategory"><option>ألعاب</option><option>تطبيقات</option><option>تعليم</option><option>أدوات</option><option>ترفيه</option><option>أخرى</option></select></div>
       <div class="upload-box"><div class="field"><label>صورة التطبيق</label><input id="iconFile" type="file" accept="image/png,image/jpeg,image/webp" required><small>PNG / JPG / WEBP — حتى 5MB</small></div></div>
-      <div class="upload-box"><div class="field"><label>ملف التطبيق APK</label><input id="apkFile" type="file" accept=".apk,application/vnd.android.package-archive" required><small>APK فقط — حتى 200MB</small></div></div>
+      <div class="upload-box"><div class="field"><label>ملف التطبيق APK</label><input id="apkFile" type="file" accept=".apk,application/vnd.android.package-archive" required><small>APK فقط — حتى 50MB</small></div></div>
       <div class="progress"><div id="uploadProgress"></div></div>
       <button class="btn primary" id="submitBtn" type="submit">إرسال للمراجعة</button>
       <div class="status" id="uploadStatus"></div>
@@ -83,11 +108,9 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,addDoc,getDocs,updateDoc,deleteDoc,query,where,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL="PASTE_SUPABASE_PROJECT_URL_HERE";
-const SUPABASE_ANON_KEY="PASTE_SUPABASE_ANON_KEY_HERE";
-const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const SUPABASE_URL="https://htxrcnnnwieljctweja.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_sjeYQmO6nHfw5Z9ksWCesQ_OiBk0p2Y";
 const SUPABASE_BUCKET="apps";
 
 const firebaseConfig={
@@ -149,6 +172,7 @@ function renderUser(user,data){
  isAdmin=(user.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
  $("adminBadge").classList.toggle("hidden",!isAdmin);
  $("upload").classList.toggle("hidden",!user||data?.blocked===true);
+ $("uploadFab").classList.toggle("show",!!user&&data?.blocked!==true);
  $("myAppsSection").classList.toggle("hidden",!user);
  $("admin").classList.toggle("hidden",!isAdmin);
  if(data?.blocked){$("uploadStatus").textContent="هذا الحساب محظور من رفع التطبيقات.";status("الحساب محظور. يمكنك التواصل مع الإدارة.");}
@@ -202,10 +226,15 @@ window.deleteAppAdmin=async id=>{
  try{
    const s=await getDoc(doc(db,"apps",id)); if(!s.exists())return;
    const a=s.data();
-   if(a.iconPath)try{await supabase.storage.from(SUPABASE_BUCKET).remove([a.iconPath]);}catch(_){}
-   if(a.apkPath)try{await supabase.storage.from(SUPABASE_BUCKET).remove([a.apkPath]);}catch(_){}
    await deleteDoc(doc(db,"apps",id)); await loadAdmin(); await loadPublicApps();
  }catch(e){alert("تعذر حذف التطبيق: "+e.message);}
+};
+
+window.openUpload=()=>{
+  const section=$("upload");
+  if(!section || section.classList.contains("hidden")) return;
+  section.scrollIntoView({behavior:"smooth",block:"start"});
+  setTimeout(()=>$("appName")?.focus(),450);
 };
 
 $("uploadForm").addEventListener("submit",async ev=>{
@@ -215,7 +244,7 @@ $("uploadForm").addEventListener("submit",async ev=>{
  const icon=$("iconFile").files[0],apk=$("apkFile").files[0];
  if(!icon||!apk)return;
  if(icon.size>5*1024*1024){alert("صورة التطبيق أكبر من 5MB.");return;}
- if(apk.size>200*1024*1024){alert("ملف APK أكبر من 200MB.");return;}
+ if(apk.size>50*1024*1024){alert("ملف APK أكبر من 50MB.");return;}
  if(!/\.apk$/i.test(apk.name)){alert("اختر ملف APK صحيح.");return;}
  const btn=$("submitBtn");btn.disabled=true;$("uploadProgress").style.width="0%";status("جاري رفع الملفات…","uploadStatus");
  try{
@@ -225,11 +254,25 @@ $("uploadForm").addEventListener("submit",async ev=>{
    const iconPath=`${currentUser.uid}/${id}/icon-${Date.now()}.${(icon.name.split(".").pop()||"png")}`;
    const apkPath=`${currentUser.uid}/${id}/app-${Date.now()}.apk`;
    async function uploadOne(path,file,start,end){
-     const {error}=await supabase.storage.from(SUPABASE_BUCKET).upload(path,file,{contentType:file.type||"application/octet-stream",upsert:false});
-     if(error) throw error;
+     const encodedPath=path.split("/").map(encodeURIComponent).join("/");
+     const url=SUPABASE_URL+"/storage/v1/object/"+SUPABASE_BUCKET+"/"+encodedPath;
+     const response=await fetch(url,{
+       method:"POST",
+       headers:{
+         "apikey":SUPABASE_ANON_KEY,
+         "Authorization":"Bearer "+SUPABASE_ANON_KEY,
+         "Content-Type":file.type||"application/octet-stream",
+         "x-upsert":"false"
+       },
+       body:file
+     });
+     if(!response.ok){
+       let detail="";
+       try{const j=await response.json();detail=j.message||j.error||"";}catch(_){}
+       throw new Error("Supabase upload "+response.status+(detail?": "+detail:""));
+     }
      $("uploadProgress").style.width=end+"%";
-     const {data}=supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
-     return data.publicUrl;
+     return SUPABASE_URL+"/storage/v1/object/public/"+SUPABASE_BUCKET+"/"+encodedPath;
    }
    const iconUrl=await uploadOne(iconPath,icon,0,25);
    const apkUrl=await uploadOne(apkPath,apk,25,100);
@@ -245,7 +288,7 @@ $("uploadForm").addEventListener("submit",async ev=>{
 onAuthStateChanged(auth,async user=>{
  currentUser=user;
  if(!user){
-   $("userBox").classList.remove("show");$("adminBadge").classList.add("hidden");$("upload").classList.add("hidden");$("myAppsSection").classList.add("hidden");$("admin").classList.add("hidden");
+   $("userBox").classList.remove("show");$("adminBadge").classList.add("hidden");$("upload").classList.add("hidden");$("uploadFab").classList.remove("show");$("myAppsSection").classList.add("hidden");$("admin").classList.add("hidden");
    return;
  }
  try{
