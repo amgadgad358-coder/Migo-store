@@ -163,13 +163,26 @@ window.downloadApp=async id=>{
 window.startGoogleLogin=async()=>{
  status("جاري فتح تسجيل الدخول باستخدام Google…");
  try{
-   // Redirect is more reliable on mobile/GitHub Pages than a popup.
-   await signInWithRedirect(auth,provider);
+   // GitHub Pages + Firebase Auth: popup avoids the cross-origin storage
+   // issue that can break signInWithRedirect in modern browsers.
+   const result=await signInWithPopup(auth,provider);
+   if(result?.user) status("تم تسجيل الدخول بالحساب: "+(result.user.email||""));
  }catch(e){
-   console.error(e);
-   // Fallback to popup if redirect cannot start.
-   try{ await signInWithPopup(auth,provider); }
-   catch(e2){ console.error(e2); status("خطأ Google: "+(e2.code||e2.message||"غير معروف")); }
+   console.error("Google popup error:",e);
+   const code=e?.code||"unknown";
+   const message=e?.message||"غير معروف";
+   if(code==="auth/popup-blocked" || code==="auth/cancelled-popup-request"){
+     try{
+       status("المتصفح منع النافذة، جاري المحاولة بطريقة إعادة التوجيه…");
+       await signInWithRedirect(auth,provider);
+       return;
+     }catch(e2){
+       console.error("Google redirect error:",e2);
+       status("خطأ Google: "+(e2?.code||"unknown")+" — "+(e2?.message||"غير معروف"));
+       return;
+     }
+   }
+   status("خطأ Google: "+code+" — "+message);
  }
 };
 window.signOutLocal=async()=>{
