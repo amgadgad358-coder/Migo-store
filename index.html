@@ -187,9 +187,13 @@ window.startGoogleLogin=async()=>{
  }
 };
 window.signOutLocal=async()=>{
- await signOut(auth);
- $("account").classList.remove("hidden");
- $("accountNav").classList.remove("hidden");
+ const btn=document.querySelector('#userBox .ghost'); if(btn) btn.disabled=true;
+ try{
+  await signOut(auth); currentUser=null; isAdmin=false;
+  $("userBox").classList.remove("show"); $("account").classList.remove("hidden"); $("accountNav").classList.remove("hidden");
+  $("upload").classList.add("hidden"); $("uploadFab").classList.remove("show"); $("myAppsSection").classList.add("hidden"); $("admin").classList.add("hidden"); $("adminBadge").classList.add("hidden");
+  status("تم تسجيل الخروج بنجاح.");
+ }catch(e){ console.error(e); status("تعذر تسجيل الخروج: "+(e.message||"خطأ غير معروف")); if(btn) btn.disabled=false; }
 };
 
 function renderUser(user,data){
