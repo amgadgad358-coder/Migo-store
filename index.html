@@ -124,7 +124,8 @@ const firebaseConfig={
 };
 const ADMIN_EMAIL="amgadgad358@gmail.com";
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});\nsetPersistence(auth,browserLocalPersistence).catch(console.error);
+const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
+setPersistence(auth,browserLocalPersistence).catch(console.error);
 const $=id=>document.getElementById(id);
 let currentUser=null,isAdmin=false;
 
