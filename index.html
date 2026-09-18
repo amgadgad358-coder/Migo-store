@@ -2,302 +2,259 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>migo store</title>
-<meta name="description" content="migo store — تطبيقات مجانية.">
+<meta name="description" content="متجر migo store - تطبيقات وألعاب مجانية">
 <style>
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;
-  background:#08090d;
-  color:#f5f7fa;
-  font-family:Arial,Tahoma,sans-serif;
-}
-a{text-decoration:none;color:inherit}
-
-header{
-  position:sticky;
-  top:0;
-  z-index:20;
-  background:rgba(8,9,13,.92);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid #191e27;
-}
-.nav{
-  max-width:1100px;
-  margin:auto;
-  padding:18px 22px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.logo{
-  font-size:25px;
-  font-weight:800;
-}
-.logo span{color:#218cff}
-.navlinks{
-  display:flex;
-  gap:24px;
-  color:#8993a1;
-  font-size:14px;
-}
-.navlinks a:hover{color:#fff}
-
-main{
-  max-width:1100px;
-  margin:auto;
-  padding:52px 22px 80px;
-}
-
-.hero{
-  padding:30px 0 65px;
-}
-.hero h1{
-  margin:0 0 12px;
-  font-size:48px;
-  line-height:1.15;
-}
-.hero p{
-  margin:0;
-  color:#9ea8b6;
-  font-size:17px;
-  line-height:1.8;
-}
-
-.section{
-  border-top:1px solid #191e27;
-  padding-top:42px;
-}
-.section-title{
-  font-size:28px;
-  margin:0 0 22px;
-}
-
-.apps{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px;
-}
-
-.app-card{
-  background:#0d1118;
-  border:1px solid #1a212c;
-  border-radius:18px;
-  padding:18px;
-  transition:.2s;
-}
-.app-card:hover{
-  border-color:#2a3442;
-  transform:translateY(-2px);
-}
-.app-top{
-  display:flex;
-  gap:17px;
-  align-items:flex-start;
-}
-.app-icon{
-  width:92px;
-  height:92px;
-  flex:0 0 92px;
-  border-radius:19px;
-  object-fit:cover;
-}
-.app-info{
-  min-width:0;
-}
-.app-title{
-  margin:2px 0 7px;
-  font-size:21px;
-}
-.badge{
-  display:inline-block;
-  padding:4px 9px;
-  border-radius:20px;
-  background:#111d2d;
-  color:#63adff;
-  font-size:12px;
-  margin-bottom:7px;
-}
-.short{
-  margin:0;
-  color:#9da7b5;
-  font-size:14px;
-  line-height:1.75;
-}
-.download{
-  display:block;
-  width:100%;
-  margin-top:18px;
-  padding:11px 16px;
-  border:0;
-  border-radius:10px;
-  background:#1685ff;
-  color:#fff;
-  text-align:center;
-  font-weight:800;
-  font-size:14px;
-  cursor:pointer;
-}
-.download:hover{background:#2b93ff}
-
-footer{
-  border-top:1px solid #191e27;
-  text-align:center;
-  padding:25px;
-  color:#707b89;
-  font-size:13px;
-}
-
-@media(max-width:720px){
-  .navlinks{display:none}
-  main{padding-top:30px}
-  .hero h1{font-size:38px}
-  .apps{grid-template-columns:1fr}
-}
-</style>
-
-<style>
-.auth-wrap{display:flex;justify-content:center;margin-top:30px}
-.auth-card{width:min(520px,100%);background:#0d1118;border:1px solid #1a212c;border-radius:20px;padding:28px;text-align:center;box-shadow:0 16px 50px rgba(0,0,0,.25)}
-.auth-card h2{margin:0 0 10px;font-size:27px}.auth-card p{color:#9da7b5;line-height:1.8;margin:0 0 20px}
-.google-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 18px;border:1px solid #2b3441;border-radius:11px;background:#fff;color:#202124;font-weight:700;cursor:pointer;font-size:15px}
-.google-btn:hover{background:#f4f4f4}.google-icon{width:20px;height:20px}
-.user-box{display:none;margin-top:18px;padding:15px;border-radius:14px;background:#111822;border:1px solid #273242;text-align:right}
-.user-box.show{display:block}.user-email{font-weight:700}.admin-badge{display:inline-block;margin-top:8px;padding:5px 10px;border-radius:999px;background:#142a20;color:#67d89b;font-size:12px}
-.status{margin-top:14px;color:#8993a1;font-size:13px;min-height:20px}.admin-panel{display:none;margin-top:18px;padding:18px;border-radius:14px;background:#101923;border:1px solid #263342}.admin-panel.show{display:block}.admin-panel h3{margin:0 0 8px}.admin-panel p{margin:0;font-size:13px}
+*{box-sizing:border-box}body{margin:0;background:#08090d;color:#f4f7fb;font-family:Arial,Tahoma,sans-serif}
+a{color:inherit;text-decoration:none}header{position:sticky;top:0;z-index:10;background:rgba(8,9,13,.92);backdrop-filter:blur(12px);border-bottom:1px solid #1d232d}
+.nav{max-width:1100px;margin:auto;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:20px}.logo{font-size:22px;font-weight:800}.logo span{color:#9b7cff}.navlinks{display:flex;gap:18px;color:#aeb7c4;font-size:14px}.navlinks a:hover{color:#fff}
+main{max-width:1100px;margin:auto;padding:0 20px}.hero{text-align:center;padding:72px 10px 45px}.hero h1{font-size:48px;margin:0 0 12px}.hero h1 span{color:#9b7cff}.hero p{color:#9aa4b2;margin:0;font-size:17px}.section{padding:25px 0 55px}.section-title{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:18px}.section-title h2{margin:0;font-size:24px}.muted{color:#8f99a8;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.card,.panel{background:#10141b;border:1px solid #202833;border-radius:18px;padding:18px}.app-top{display:flex;gap:14px;align-items:center}.app-icon{width:74px;height:74px;border-radius:17px;object-fit:cover;background:#171d26;border:1px solid #29313c}.app-name{margin:0 0 7px;font-size:19px}.app-desc{margin:0;color:#a6afbb;line-height:1.7;font-size:13px}.app-meta{margin-top:13px;color:#7f8a99;font-size:12px}.btn{border:0;border-radius:12px;padding:11px 15px;cursor:pointer;font-weight:700;font-size:14px}.primary{background:#9b7cff;color:#fff}.danger{background:#3a1518;color:#ff9b9b}.success{background:#153622;color:#8ce0a7}.ghost{background:#1a2029;color:#e8edf3}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.empty{text-align:center;color:#8e98a6;padding:35px}.auth-wrap{max-width:650px;margin:auto}.auth-card{background:#10141b;border:1px solid #202833;border-radius:18px;padding:22px}.auth-card h2{margin:0 0 8px}.auth-card>p{color:#9ba5b2;line-height:1.7;font-size:14px}.google-btn{width:100%;display:flex;justify-content:center;align-items:center;gap:10px;padding:13px;border-radius:12px;border:1px solid #c8cdd5;background:#fff;color:#202124;font-weight:700;cursor:pointer}.google-icon{width:20px;height:20px}.status{min-height:22px;margin-top:12px;color:#a9b3c0;font-size:13px}.user-box{display:none;margin-top:14px;padding:14px;border-radius:14px;background:#0c1117;border:1px solid #222c37}.user-box.show{display:block}.admin-badge{display:inline-block;margin-top:8px;padding:5px 9px;border-radius:999px;background:#162a20;color:#79dfa1;font-size:12px}
+.form{display:grid;gap:12px}.field{display:grid;gap:7px}.field label{font-size:13px;color:#b9c2cd}.field input,.field textarea,.field select{width:100%;padding:12px;border-radius:11px;border:1px solid #29323e;background:#0b1016;color:#fff;outline:none}.field textarea{min-height:110px;resize:vertical}.field small{color:#7e8997;font-size:11px}.upload-box{border:1px dashed #394352;border-radius:13px;padding:14px;background:#0c1117}.progress{height:7px;background:#1b222c;border-radius:10px;overflow:hidden;margin-top:8px}.progress>div{height:100%;width:0;background:#9b7cff;transition:width .2s}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.list{display:grid;gap:10px;margin-top:12px}.row{padding:12px;border:1px solid #252e39;border-radius:12px;background:#0d1218}.row-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.tag{font-size:11px;padding:4px 8px;border-radius:999px;background:#222a35;color:#b9c2cf}.tag.pending{color:#ffd28a}.tag.approved{color:#8ce0a7}.tag.rejected{color:#ff9d9d}.row small{display:block;color:#7f8a98;margin-top:6px}.hidden{display:none!important}
+footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1d232d;margin-top:30px}
+@media(max-width:760px){.grid,.admin-grid{grid-template-columns:1fr}.hero{padding-top:50px}.hero h1{font-size:38px}.nav{align-items:flex-start}.navlinks{gap:10px}}
 </style>
 </head>
 <body>
-<header>
-  <div class="nav">
-    <div class="logo"><span>migo</span> store</div>
-    <nav class="navlinks">
-      <a href="#home">الرئيسية</a>
-      <a href="#account">الحساب</a>
-    </nav>
-  </div>
-</header>
+<header><div class="nav">
+  <div class="logo"><span>migo</span> store</div>
+  <nav class="navlinks"><a href="#home">الرئيسية</a><a href="#apps">التطبيقات</a><a href="#account">الحساب</a><a href="#upload">رفع تطبيق</a></nav>
+</div></header>
 
 <main id="home">
-  <section class="hero">
-    <h1>migo store</h1>
-    <p>تطبيقات مجانية، بسيطة وسهلة التحميل.</p>
-  </section>
+<section class="hero"><h1><span>migo</span> store</h1><p>تطبيقات وألعاب مجانية، يرفعها المستخدمون وتُنشر بعد مراجعة الإدارة.</p></section>
 
-  <section class="section" id="account">
-    <div class="auth-wrap">
-      <div class="auth-card">
-        <h2>حسابك في migo store</h2>
-        <p>أنشئ حسابك أو سجّل الدخول باستخدام Google للوصول إلى حسابك في المتجر.</p>
+<section class="section" id="apps">
+  <div class="section-title"><h2>التطبيقات والألعاب</h2><span class="muted" id="appsCount"></span></div>
+  <div id="appsGrid" class="grid"><div class="empty">جاري تحميل التطبيقات…</div></div>
+</section>
 
-        <button class="google-btn" id="googleBtn" type="button" onclick="startGoogleLogin()">
-          <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.23c0-.71-.06-1.4-.18-2.05H12v3.88h5.22a4.46 4.46 0 0 1-1.94 2.93v2.43h3.14c1.84-1.69 2.93-4.18 2.93-7.19z"/><path fill="#34A853" d="M12 21.82c2.63 0 4.84-.87 6.45-2.4l-3.14-2.43c-.87.58-1.98.93-3.31.93-2.55 0-4.71-1.72-5.49-4.03H3.27v2.5A9.74 9.74 0 0 0 12 21.82z"/><path fill="#FBBC05" d="M6.51 13.89A5.86 5.86 0 0 1 6.2 12c0-.66.11-1.3.31-1.89v-2.5H3.27A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.02 4.39l3.24-2.5z"/><path fill="#EA4335" d="M12 6.08c1.43 0 2.72.49 3.74 1.46l2.8-2.8C16.84 3.16 14.63 2.18 12 2.18a9.74 9.74 0 0 0-8.73 5.43l3.24 2.5C7.29 7.8 9.45 6.08 12 6.08z"/></svg>
-          <span>متابعة باستخدام Google</span>
-        </button>
-
-        <div class="status" id="authStatus"></div>
-
-        <div class="user-box" id="userBox">
-          <div>تم تسجيل الدخول بالحساب:</div>
-          <div class="user-email" id="userEmail"></div>
-          <div class="admin-badge" id="adminBadge" style="display:none">Admin</div>
-          <button class="download" style="margin-top:14px" type="button" onclick="signOutLocal()">تسجيل الخروج</button>
-        </div>
-
-        <div class="admin-panel" id="adminPanel">
-          <h3>لوحة الإدارة</h3>
-          <p>تم التعرف على هذا الحساب كحساب Admin. سنستخدم هذه المنطقة لاحقًا لإدارة التطبيقات والمستخدمين.</p>
-        </div>
-      </div>
+<section class="section" id="account">
+  <div class="auth-wrap"><div class="auth-card">
+    <h2>حسابك في migo store</h2>
+    <p>سجّل الدخول باستخدام Google. بعد تسجيل الدخول يمكنك رفع ألعابك وتطبيقاتك ومتابعة حالة المراجعة.</p>
+    <button class="google-btn" id="googleBtn" type="button" onclick="startGoogleLogin()">
+      <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.23c0-.71-.06-1.4-.18-2.05H12v3.88h5.22a4.46 4.46 0 0 1-1.94 2.93v2.43h3.14c1.84-1.69 2.93-4.18 2.93-7.19z"/><path fill="#34A853" d="M12 21.82c2.63 0 4.84-.87 6.45-2.4l-3.14-2.43c-.87.58-1.98.93-3.31.93-2.55 0-4.71-1.72-5.49-4.03H3.27v2.5A9.74 9.74 0 0 0 12 21.82z"/><path fill="#FBBC05" d="M6.51 13.89A5.86 5.86 0 0 1 6.2 12c0-.66.11-1.3.31-1.89v-2.5H3.27A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.02 4.39l3.24-2.5z"/><path fill="#EA4335" d="M12 6.08c1.43 0 2.72.49 3.74 1.46l2.8-2.8C16.84 3.16 14.63 2.18 12 2.18a9.74 9.74 0 0 0-8.73 5.43l3.24 2.5C7.29 7.8 9.45 6.08 12 6.08z"/></svg>
+      <span>متابعة باستخدام Google</span>
+    </button>
+    <div class="status" id="authStatus"></div>
+    <div class="user-box" id="userBox">
+      <div>الحساب الحالي:</div><div id="userEmail" style="font-weight:700;margin-top:5px"></div>
+      <div class="admin-badge hidden" id="adminBadge">ADMIN</div>
+      <div class="actions"><button class="btn ghost" type="button" onclick="signOutLocal()">تسجيل الخروج</button></div>
     </div>
-  </section>
-</main>
+  </div></div>
+</section>
 
+<section class="section hidden" id="upload">
+  <div class="section-title"><h2>رفع تطبيق أو لعبة</h2><span class="muted">يتم النشر بعد موافقة الإدارة</span></div>
+  <div class="panel">
+    <form class="form" id="uploadForm">
+      <div class="field"><label>اسم التطبيق / اللعبة</label><input id="appName" maxlength="80" required></div>
+      <div class="field"><label>الوصف</label><textarea id="appDescription" maxlength="500" placeholder="اكتب وصفًا مختصرًا للتطبيق أو اللعبة" required></textarea></div>
+      <div class="field"><label>الإصدار</label><input id="appVersion" maxlength="30" placeholder="مثال: 1.0.0"></div>
+      <div class="field"><label>التصنيف</label><select id="appCategory"><option>ألعاب</option><option>تطبيقات</option><option>تعليم</option><option>أدوات</option><option>ترفيه</option><option>أخرى</option></select></div>
+      <div class="upload-box"><div class="field"><label>صورة التطبيق</label><input id="iconFile" type="file" accept="image/png,image/jpeg,image/webp" required><small>PNG / JPG / WEBP — حتى 5MB</small></div></div>
+      <div class="upload-box"><div class="field"><label>ملف التطبيق APK</label><input id="apkFile" type="file" accept=".apk,application/vnd.android.package-archive" required><small>APK فقط — حتى 200MB</small></div></div>
+      <div class="progress"><div id="uploadProgress"></div></div>
+      <button class="btn primary" id="submitBtn" type="submit">إرسال للمراجعة</button>
+      <div class="status" id="uploadStatus"></div>
+    </form>
+  </div>
+</section>
+
+<section class="section hidden" id="myAppsSection">
+  <div class="section-title"><h2>تطبيقاتي</h2><span class="muted">حالة كل طلب</span></div>
+  <div id="myApps" class="grid"></div>
+</section>
+
+<section class="section hidden" id="admin">
+  <div class="section-title"><h2>لوحة الإدارة</h2><span class="muted">إدارة التطبيقات والحسابات</span></div>
+  <div class="admin-grid">
+    <div class="panel"><h3 style="margin-top:0">طلبات التطبيقات</h3><div id="adminApps" class="list">جاري التحميل…</div></div>
+    <div class="panel"><h3 style="margin-top:0">الحسابات المسجلة</h3><div id="adminUsers" class="list">جاري التحميل…</div></div>
+  </div>
+</section>
+</main>
 <footer>migo store</footer>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import {
-    getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    onAuthStateChanged,
-    signOut
-  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {getFirestore,collection,doc,getDoc,setDoc,addDoc,getDocs,updateDoc,deleteDoc,query,where,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDIVIiWxAGPRN1diUfnX3VG4XFEKhpQqi8",
-    authDomain: "migo-store.firebaseapp.com",
-    projectId: "migo-store",
-    storageBucket: "migo-store.firebasestorage.app",
-    messagingSenderId: "418438022956",
-    appId: "1:418438022956:web:832586300ca651a3124e89",
-    measurementId: "G-SMNL93EJSE"
-  };
+const SUPABASE_URL="PASTE_SUPABASE_PROJECT_URL_HERE";
+const SUPABASE_ANON_KEY="PASTE_SUPABASE_ANON_KEY_HERE";
+const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const SUPABASE_BUCKET="apps";
 
-  const ADMIN_EMAIL = "amgadgad358@gmail.com";
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
+const firebaseConfig={
+ apiKey:"AIzaSyDIVIiWxAGPRN1diUfnX3VG4XFEKhpQqi8",
+ authDomain:"migo-store.firebaseapp.com",
+ projectId:"migo-store",
+ storageBucket:"migo-store.firebasestorage.app",
+ messagingSenderId:"418438022956",
+ appId:"1:418438022956:web:832586300ca651a3124e89",
+ measurementId:"G-SMNL93EJSE"
+};
+const ADMIN_EMAIL="amgadgad358@gmail.com";
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
+const $=id=>document.getElementById(id);
+let currentUser=null,isAdmin=false;
 
-  const $ = (id) => document.getElementById(id);
+function status(msg,id="authStatus"){ $(id).textContent=msg||""; }
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function dateText(ts){if(!ts?.toDate)return "";return ts.toDate().toLocaleString("ar-EG");}
 
-  function setStatus(message) {
-    $("authStatus").textContent = message || "";
-  }
+async function ensureProfile(user){
+ const r=doc(db,"users",user.uid), snap=await getDoc(r);
+ if(!snap.exists()) await setDoc(r,{uid:user.uid,email:user.email||"",name:user.displayName||"",photoURL:user.photoURL||"",blocked:false,createdAt:serverTimestamp()});
+ return (await getDoc(r)).data();
+}
+async function loadPublicApps(){
+ const grid=$("appsGrid"); grid.innerHTML='<div class="empty">جاري تحميل التطبيقات…</div>';
+ try{
+   const snap=await getDocs(query(collection(db,"apps"),where("status","==","approved")));
+   const apps=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+   $("appsCount").textContent=apps.length+" تطبيق";
+   if(!apps.length){grid.innerHTML='<div class="empty">لا توجد تطبيقات منشورة حتى الآن.</div>';return;}
+   grid.innerHTML=apps.map(a=>`<article class="card">
+     <div class="app-top"><img class="app-icon" src="${esc(a.iconUrl)}" alt=""><div><h3 class="app-name">${esc(a.name)}</h3><p class="app-desc">${esc(a.description)}</p></div></div>
+     <div class="app-meta">${esc(a.category||"أخرى")} · الإصدار ${esc(a.version||"1.0")} · ${Number(a.downloads||0)} تحميل</div>
+     <div class="actions"><button class="btn primary" onclick="downloadApp('${a.id}')">تحميل APK</button></div>
+   </article>`).join("");
+ }catch(e){console.error(e);grid.innerHTML='<div class="empty">تعذر تحميل التطبيقات. تأكد من إعداد Firestore والقواعد.</div>';}
+}
+window.downloadApp=async id=>{
+ try{
+   const s=await getDoc(doc(db,"apps",id)); if(!s.exists())return;
+   const a=s.data(); if(a.status!=="approved")return;
+   window.open(a.apkUrl,"_blank","noopener");
+   await updateDoc(doc(db,"apps",id),{downloads:increment(1)});
+ }catch(e){alert("تعذر بدء التحميل.");}
+};
 
-  function showUser(user) {
-    if (!user) {
-      $("userBox").classList.remove("show");
-      $("adminPanel").classList.remove("show");
-      $("adminBadge").style.display = "none";
-      return;
-    }
+window.startGoogleLogin=async()=>{
+ status("جاري فتح تسجيل الدخول باستخدام Google…");
+ try{await signInWithPopup(auth,provider);status("تم تسجيل الدخول.");}
+ catch(e){console.error(e);status("خطأ Google: "+(e.code||"غير معروف")+" — "+(e.message||""));}
+};
+window.signOutLocal=async()=>{await signOut(auth);};
 
-    const email = (user.email || "").toLowerCase();
-    const isAdmin = email === ADMIN_EMAIL.toLowerCase();
-    $("userEmail").textContent = (user.displayName || email) + " — " + email;
-    $("userBox").classList.add("show");
-    $("adminBadge").style.display = isAdmin ? "inline-block" : "none";
-    $("adminPanel").classList.toggle("show", isAdmin);
-  }
+function renderUser(user,data){
+ $("userBox").classList.add("show"); $("userEmail").textContent=(user.displayName||"")+" — "+user.email;
+ isAdmin=(user.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
+ $("adminBadge").classList.toggle("hidden",!isAdmin);
+ $("upload").classList.toggle("hidden",!user||data?.blocked===true);
+ $("myAppsSection").classList.toggle("hidden",!user);
+ $("admin").classList.toggle("hidden",!isAdmin);
+ if(data?.blocked){$("uploadStatus").textContent="هذا الحساب محظور من رفع التطبيقات.";status("الحساب محظور. يمكنك التواصل مع الإدارة.");}
+}
 
-  window.startGoogleLogin = async function () {
-    setStatus("جاري فتح تسجيل الدخول باستخدام Google… إذا لم تظهر النافذة خلال ثوانٍ، سيظهر سبب المشكلة هنا.");
-    try {
-      await signInWithPopup(auth, provider);
-      setStatus("تم تسجيل الدخول بنجاح.");
-    } catch (error) {
-      console.error(error);
-      if (error.code === "auth/popup-closed-by-user") {
-        setStatus("تم إغلاق نافذة تسجيل الدخول.");
-      } else if (error.code === "auth/unauthorized-domain") {
-        setStatus("هذا الدومين غير مضاف في Firebase. أضفه من Authentication → Settings → Authorized domains.");
-      } else if (error.code === "auth/popup-blocked") {
-        setStatus("المتصفح منع نافذة Google. اسمح بالنوافذ المنبثقة ثم حاول مرة أخرى.");
-      } else {
-        setStatus("خطأ Google: " + (error.code || "غير معروف") + " — " + (error.message || "تأكد من إعداد Firebase وAuthorized domains."));
-      }
-    }
-  };
+async function loadMyApps(){
+ if(!currentUser)return;
+ const snap=await getDocs(query(collection(db,"apps"),where("ownerId","==",currentUser.uid)));
+ const apps=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+ $("myApps").innerHTML=apps.length?apps.map(a=>`<div class="card">
+   <div class="app-top">${a.iconUrl?`<img class="app-icon" src="${esc(a.iconUrl)}" alt="">`:""}<div><h3 class="app-name">${esc(a.name)}</h3><p class="app-desc">${esc(a.description)}</p></div></div>
+   <div class="app-meta">الحالة: <span class="tag ${esc(a.status)}">${a.status==="pending"?"قيد المراجعة":a.status==="approved"?"تمت الموافقة":"مرفوض"}</span></div>
+   <div class="app-meta">${dateText(a.createdAt)}</div>
+ </div>`).join(""):'<div class="empty">لم ترفع أي تطبيق بعد.</div>';
+}
 
-  window.signOutLocal = async function () {
-    try {
-      await signOut(auth);
-      setStatus("تم تسجيل الخروج.");
-    } catch (error) {
-      console.error(error);
-      setStatus("تعذر تسجيل الخروج.");
-    }
-  };
+async function loadAdmin(){
+ if(!isAdmin)return;
+ const [appsSnap,usersSnap]=await Promise.all([getDocs(collection(db,"apps")),getDocs(collection(db,"users"))]);
+ const apps=appsSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+ const users=usersSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+ $("adminApps").innerHTML=apps.length?apps.map(a=>`<div class="row">
+   <div class="row-top"><strong>${esc(a.name)}</strong><span class="tag ${esc(a.status)}">${esc(a.status)}</span></div>
+   <small>المالك: ${esc(a.ownerEmail||"")} · ${esc(a.category||"")}</small>
+   <div class="actions">
+    ${a.status!=="approved"?`<button class="btn success" onclick="setAppStatus('${a.id}','approved')">موافقة</button>`:""}
+    ${a.status!=="rejected"?`<button class="btn danger" onclick="setAppStatus('${a.id}','rejected')">رفض</button>`:""}
+    <button class="btn ghost" onclick="deleteAppAdmin('${a.id}')">حذف</button>
+   </div>
+ </div>`).join(""):'<div class="empty">لا توجد طلبات.</div>';
+ $("adminUsers").innerHTML=users.length?users.map(u=>`<div class="row">
+   <div class="row-top"><strong>${esc(u.name||"بدون اسم")}</strong><span class="tag">${u.blocked?"محظور":"نشط"}</span></div>
+   <small>${esc(u.email||"")}</small>
+   <div class="actions">${u.email?.toLowerCase()!==ADMIN_EMAIL.toLowerCase()?`<button class="btn ${u.blocked?"success":"danger"}" onclick="toggleBlock('${u.id}',${!u.blocked})">${u.blocked?"إلغاء الحظر":"حظر الحساب"}</button>`:"<span class='muted'>حساب الإدارة</span>"}</div>
+ </div>`).join(""):'<div class="empty">لا توجد حسابات.</div>';
+}
 
-  onAuthStateChanged(auth, (user) => {
-    showUser(user);
-    if (user) setStatus("تم تسجيل الدخول بالحساب: " + user.email);
-  });
+window.setAppStatus=async(id,newStatus)=>{
+ if(!isAdmin)return;
+ try{await updateDoc(doc(db,"apps",id),{status:newStatus,reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.email});await loadAdmin();await loadPublicApps();await loadMyApps();}
+ catch(e){alert("تعذر تحديث حالة التطبيق: "+e.message);}
+};
+window.toggleBlock=async(uid,blocked)=>{
+ if(!isAdmin)return;
+ try{await updateDoc(doc(db,"users",uid),{blocked});await loadAdmin();}
+ catch(e){alert("تعذر تغيير حالة الحساب: "+e.message);}
+};
+window.deleteAppAdmin=async id=>{
+ if(!isAdmin)return;
+ if(!confirm("هل تريد حذف هذا التطبيق نهائيًا؟"))return;
+ try{
+   const s=await getDoc(doc(db,"apps",id)); if(!s.exists())return;
+   const a=s.data();
+   if(a.iconPath)try{await supabase.storage.from(SUPABASE_BUCKET).remove([a.iconPath]);}catch(_){}
+   if(a.apkPath)try{await supabase.storage.from(SUPABASE_BUCKET).remove([a.apkPath]);}catch(_){}
+   await deleteDoc(doc(db,"apps",id)); await loadAdmin(); await loadPublicApps();
+ }catch(e){alert("تعذر حذف التطبيق: "+e.message);}
+};
+
+$("uploadForm").addEventListener("submit",async ev=>{
+ ev.preventDefault();
+ if(!currentUser){alert("سجّل الدخول أولًا.");return;}
+ const name=$("appName").value.trim(),description=$("appDescription").value.trim(),version=$("appVersion").value.trim()||"1.0",category=$("appCategory").value;
+ const icon=$("iconFile").files[0],apk=$("apkFile").files[0];
+ if(!icon||!apk)return;
+ if(icon.size>5*1024*1024){alert("صورة التطبيق أكبر من 5MB.");return;}
+ if(apk.size>200*1024*1024){alert("ملف APK أكبر من 200MB.");return;}
+ if(!/\.apk$/i.test(apk.name)){alert("اختر ملف APK صحيح.");return;}
+ const btn=$("submitBtn");btn.disabled=true;$("uploadProgress").style.width="0%";status("جاري رفع الملفات…","uploadStatus");
+ try{
+   const profile=await ensureProfile(currentUser);
+   if(profile.blocked)throw new Error("هذا الحساب محظور.");
+   const id=crypto.randomUUID();
+   const iconPath=`${currentUser.uid}/${id}/icon-${Date.now()}.${(icon.name.split(".").pop()||"png")}`;
+   const apkPath=`${currentUser.uid}/${id}/app-${Date.now()}.apk`;
+   async function uploadOne(path,file,start,end){
+     const {error}=await supabase.storage.from(SUPABASE_BUCKET).upload(path,file,{contentType:file.type||"application/octet-stream",upsert:false});
+     if(error) throw error;
+     $("uploadProgress").style.width=end+"%";
+     const {data}=supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
+     return data.publicUrl;
+   }
+   const iconUrl=await uploadOne(iconPath,icon,0,25);
+   const apkUrl=await uploadOne(apkPath,apk,25,100);
+   await setDoc(doc(db,"apps",id),{
+     name,description,version,category,ownerId:currentUser.uid,ownerEmail:currentUser.email||"",ownerName:currentUser.displayName||"",
+     iconUrl,apkUrl,iconPath,apkPath,status:"pending",downloads:0,createdAt:serverTimestamp()
+   });
+   ev.target.reset();$("uploadProgress").style.width="100%";status("تم إرسال التطبيق للمراجعة. لن يظهر للناس حتى توافق الإدارة.","uploadStatus");await loadMyApps();
+ }catch(e){console.error(e);status("تعذر رفع التطبيق: "+(e.message||"تحقق من إعدادات Firebase والقواعد."),"uploadStatus");}
+ finally{btn.disabled=false;}
+});
+
+onAuthStateChanged(auth,async user=>{
+ currentUser=user;
+ if(!user){
+   $("userBox").classList.remove("show");$("adminBadge").classList.add("hidden");$("upload").classList.add("hidden");$("myAppsSection").classList.add("hidden");$("admin").classList.add("hidden");
+   return;
+ }
+ try{
+   const profile=await ensureProfile(user);
+   renderUser(user,profile); await loadMyApps(); if(isAdmin)await loadAdmin();
+   status("تم تسجيل الدخول بالحساب: "+user.email);
+ }catch(e){console.error(e);status("تعذر تجهيز الحساب: "+e.message);}
+});
+loadPublicApps();
 </script>
 </body>
 </html>
