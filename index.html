@@ -41,7 +41,7 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 <body>
 <header><div class="nav">
   <div class="logo"><span>migo</span> store</div>
-  <nav class="navlinks"><a href="#home">الرئيسية</a><a href="#apps">التطبيقات</a><a href="#account">الحساب</a><a href="#upload">رفع تطبيق</a></nav>
+  <nav class="navlinks"><a href="#home">الرئيسية</a><a href="#apps">التطبيقات</a><a href="#account" id="accountNav">الحساب</a><a href="#upload">رفع تطبيق</a></nav>
 </div></header>
 <button class="upload-fab" id="uploadFab" type="button" onclick="openUpload()">
   <span class="plus">+</span><span>رفع تطبيق</span>
@@ -106,7 +106,7 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,addDoc,getDocs,updateDoc,deleteDoc,query,where,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const SUPABASE_URL="https://htxrcnnnwieljctweja.supabase.co";
@@ -124,7 +124,7 @@ const firebaseConfig={
 };
 const ADMIN_EMAIL="amgadgad358@gmail.com";
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
+const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});\nsetPersistence(auth,browserLocalPersistence).catch(console.error);
 const $=id=>document.getElementById(id);
 let currentUser=null,isAdmin=false;
 
@@ -172,17 +172,31 @@ window.startGoogleLogin=async()=>{
    catch(e2){ console.error(e2); status("خطأ Google: "+(e2.code||e2.message||"غير معروف")); }
  }
 };
-window.signOutLocal=async()=>{await signOut(auth);};
+window.signOutLocal=async()=>{
+ await signOut(auth);
+ $("account").classList.remove("hidden");
+ $("accountNav").classList.remove("hidden");
+};
 
 function renderUser(user,data){
- $("userBox").classList.add("show"); $("userEmail").textContent=(user.displayName||"")+" — "+user.email;
+ $("userBox").classList.add("show");
+ $("userEmail").textContent=(user.displayName||"")+" — "+user.email;
  isAdmin=(user.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
+
+ // بعد تسجيل الدخول نخفي واجهة تسجيل الدخول بالكامل.
+ $("account").classList.add("hidden");
+ $("accountNav").classList.add("hidden");
+
  $("adminBadge").classList.toggle("hidden",!isAdmin);
  $("upload").classList.toggle("hidden",!user||data?.blocked===true);
  $("uploadFab").classList.toggle("show",!!user&&data?.blocked!==true);
  $("myAppsSection").classList.toggle("hidden",!user);
  $("admin").classList.toggle("hidden",!isAdmin);
- if(data?.blocked){$("uploadStatus").textContent="هذا الحساب محظور من رفع التطبيقات.";status("الحساب محظور. يمكنك التواصل مع الإدارة.");}
+
+ if(data?.blocked){
+   $("uploadStatus").textContent="هذا الحساب محظور من رفع التطبيقات.";
+   status("الحساب محظور. يمكنك التواصل مع الإدارة.");
+ }
 }
 
 async function loadMyApps(){
@@ -292,24 +306,46 @@ $("uploadForm").addEventListener("submit",async ev=>{
  finally{btn.disabled=false;}
 });
 
-getRedirectResult(auth).then(async result=>{
+getRedirectResult(auth).then(result=>{
   if(result?.user) status("تم تسجيل الدخول.");
 }).catch(e=>{
-  if(e?.code) status("خطأ Google: "+e.code);
-  console.error(e);
+  console.error("Google redirect error:",e);
+  const code=e?.code||"unknown";
+  const message=e?.message||"تعذر إكمال تسجيل الدخول";
+  status("خطأ Google: "+code+" — "+message);
 });
 
 onAuthStateChanged(auth,async user=>{
  currentUser=user;
  if(!user){
-   $("userBox").classList.remove("show");$("adminBadge").classList.add("hidden");$("upload").classList.add("hidden");$("uploadFab").classList.remove("show");$("myAppsSection").classList.add("hidden");$("admin").classList.add("hidden");
+   $("userBox").classList.remove("show");
+   $("adminBadge").classList.add("hidden");
+   $("upload").classList.add("hidden");
+   $("uploadFab").classList.remove("show");
+   $("myAppsSection").classList.add("hidden");
+   $("admin").classList.add("hidden");
+   $("account").classList.remove("hidden");
+   $("accountNav").classList.remove("hidden");
    return;
  }
  try{
-   const profile=await ensureProfile(user);
-   renderUser(user,profile); await loadMyApps(); if(isAdmin)await loadAdmin();
+   // إظهار حالة تسجيل الدخول فورًا؛ لا نجعل Firestore يمنع ظهور الحساب.
+   renderUser(user,{blocked:false});
    status("تم تسجيل الدخول بالحساب: "+user.email);
- }catch(e){console.error(e);status("تعذر تجهيز الحساب: "+e.message);}
+
+   try{
+     const profile=await ensureProfile(user);
+     renderUser(user,profile);
+     await loadMyApps();
+     if(isAdmin) await loadAdmin();
+   }catch(profileError){
+     console.error("Firestore profile error:",profileError);
+     status("تم تسجيل الدخول، لكن تعذر تحميل بيانات الحساب: "+(profileError.code||profileError.message||"خطأ غير معروف"));
+   }
+ }catch(e){
+   console.error("Auth UI error:",e);
+   status("تعذر تجهيز واجهة الحساب: "+(e.message||"خطأ غير معروف"));
+ }
 });
 loadPublicApps();
 </script>
