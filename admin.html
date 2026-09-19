@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1"
+>
+
+<title>لوحة الإدارة - migo store</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+html,body{
+margin:0;
+padding:0;
+width:100%;
+overflow-x:hidden;
+}
+
+body{
+font-family:Arial,Tahoma,sans-serif;
+background:#f5f5f5;
+color:#222;
+}
+
+header{
+background:#fff;
+border-bottom:1px solid #ddd;
+}
+
+.nav{
+width:100%;
+max-width:1100px;
+margin:auto;
+padding:12px 16px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:15px;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+}
+
+.navlinks{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+}
+
+.navlinks a{
+padding:9px 11px;
+border-radius:8px;
+font-size:14px;
+}
+
+.navlinks a:hover{
+background:#eee;
+}
+
+.container{
+width:100%;
+max-width:1100px;
+margin:auto;
+padding:25px 16px;
+}
+
+.panel{
+background:#fff;
+border:1px solid #ddd;
+border-radius:15px;
+padding:18px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:15px;
+}
+
+.row{
+border:1px solid #ddd;
+border-radius:12px;
+padding:13px;
+margin-top:10px;
+background:#fafafa;
+}
+
+.row-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+}
+
+.status{
+font-size:12px;
+padding:5px 9px;
+border-radius:20px;
+background:#eee;
+}
+
+.pending{
+background:#fff0c7;
+}
+
+.approved{
+background:#d9f5e1;
+}
+
+.rejected{
+background:#ffdede;
+}
+
+.actions{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+margin-top:12px;
+}
+
+button{
+border:0;
+border-radius:8px;
+padding:10px 13px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.success{
+background:#d9f5e1;
+color:#185b2d;
+}
+
+.danger{
+background:#ffdede;
+color:#8b1e1e;
+}
+
+.normal{
+background:#e8e8e8;
+color:#222;
+}
+
+.hidden{
+display:none!important;
+}
+
+@media(max-width:700px){
+
+.nav{
+flex-direction:column;
+align-items:stretch;
+}
+
+.navlinks{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+}
+
+.navlinks a{
+text-align:center;
+background:#f2f2f2;
+}
+
+.container{
+padding:15px 12px;
+}
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.row-top{
+align-items:flex-start;
+flex-direction:column;
+}
+
+.actions{
+flex-direction:column;
+}
+
+.actions button{
+width:100%;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="nav">
+
+<div class="logo">
+migo store
+</div>
+
+<nav class="navlinks">
+
+<a href="index.html">الرئيسية</a>
+
+<a href="apps.html">التطبيقات</a>
+
+<a href="login.html">تسجيل الدخول</a>
+
+<a href="account.html">الحساب</a>
+
+<a href="upload.html">رفع تطبيق</a>
+
+</nav>
+
+</div>
+
+</header>
+
+<main class="container">
+
+<div
+id="checking"
+class="panel"
+>
+جاري التحقق من صلاحيات الإدارة...
+</div>
+
+<div
+id="denied"
+class="panel hidden"
+>
+
+<h1>
+غير مسموح
+</h1>
+
+<p>
+هذه الصفحة متاحة لحساب الإدارة فقط.
+</p>
+
+<a href="login.html">
+تسجيل الدخول
+</a>
+
+</div>
+
+<div
+id="adminPanel"
+class="hidden"
+>
+
+<h1>
+لوحة الإدارة
+</h1>
+
+<div class="grid">
+
+<section class="panel">
+
+<h2>
+طلبات التطبيقات
+</h2>
+
+<div id="appsList">
+جاري التحميل...
+</div>
+
+</section>
+
+<section class="panel">
+
+<h2>
+الحسابات
+</h2>
+
+<div id="usersList">
+جاري التحميل...
+</div>
+
+</section>
+
+</div>
+
+</div>
+
+</main>
+
+<script type="module">
+
+import {
+initializeApp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+import {
+getAuth,
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+import {
+getFirestore,
+collection,
+getDocs,
+doc,
+updateDoc,
+deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyDIVIiWxAGPRN1diUfnX3VG4XFEkhpQqi8",
+authDomain:"migo-store.firebaseapp.com",
+projectId:"migo-store",
+storageBucket:"migo-store.firebasestorage.app",
+messagingSenderId:"418438022956",
+appId:"1:418438022956:web:832586300ca651a3124e89",
+measurementId:"G-SMNL93EJSE"
+};
+
+const ADMIN_EMAIL="amgadgad358@gmail.com";
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+const checking=document.getElementById("checking");
+const denied=document.getElementById("denied");
+const adminPanel=document.getElementById("adminPanel");
+
+const appsList=document.getElementById("appsList");
+const usersList=document.getElementById("usersList");
+
+function esc(value){
+
+return String(value||"").replace(/[&<>"']/g,function(char){
+
+return {
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[char];
+
+});
+
+}
+
+async function loadApps(){
+
+const result=
+await getDocs(
+collection(db,"apps")
+);
+
+const apps=result.docs.map(function(item){
+
+return {
+id:item.id,
+...item.data()
+};
+
+});
+
+if(!apps.length){
+
+appsList.innerHTML=
+"<p>لا توجد طلبات.</p>";
+
+return;
+
+}
+
+appsList.innerHTML=apps.map(function(item){
+
+let state="pending";
+let stateText="قيد المراجعة";
+
+if(item.status==="approved"){
+
+state="approved";
+stateText="تمت الموافقة";
+
+}
+
+if(item.status==="rejected"){
+
+state="rejected";
+stateText="مرفوض";
+
+}
+
+return `
+
+<div class="row">
+
+<div class="row-top">
+
+<strong>
+${esc(item.name)}
+</strong>
+
+<span class="status ${state}">
+${stateText}
+</span>
+
+</div>
+
+<p>
+${esc(item.description)}
+</p>
+
+<small>
+المالك:
+${esc(item.ownerEmail)}
+</small>
+
+<div class="actions">
+
+${
+item.status!=="approved"
+?
+`
+<button
+class="success"
+data-action="approve"
+data-id="${item.id}"
+>
+موافقة
+</button>
+`
+:
+""
+}
+
+${
+item.status!=="rejected"
+?
+`
+<button
+class="danger"
+data-action="reject"
+data-id="${item.id}"
+>
+رفض
+</button>
+`
+:
+""
+}
+
+<button
+class="normal"
+data-action="delete"
+data-id="${item.id}"
+>
+حذف
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}).join("");
+
+appsList
+.querySelectorAll("button[data-action]")
+.forEach(function(button){
+
+button.addEventListener("click",async function(){
+
+const id=button.dataset.id;
+const action=button.dataset.action;
+
+try{
+
+if(action==="approve"){
+
+await updateDoc(
+doc(db,"apps",id),
+{
+status:"approved"
+}
+);
+
+}
+
+if(action==="reject"){
+
+await updateDoc(
+doc(db,"apps",id),
+{
+status:"rejected"
+}
+);
+
+}
+
+if(action==="delete"){
+
+const confirmDelete=
+confirm(
+"هل تريد حذف هذا التطبيق؟"
+);
+
+if(!confirmDelete) return;
+
+await deleteDoc(
+doc(db,"apps",id)
+);
+
+}
+
+await loadApps();
+
+}catch(error){
+
+alert(
+"حدث خطأ: "+
+(error.message||"")
+);
+
+}
+
+});
+
+});
+
+}
+
+async function loadUsers(){
+
+const result=
+await getDocs(
+collection(db,"users")
+);
+
+const users=result.docs.map(function(item){
+
+return {
+id:item.id,
+...item.data()
+};
+
+});
+
+if(!users.length){
+
+usersList.innerHTML=
+"<p>لا توجد حسابات.</p>";
+
+return;
+
+}
+
+usersList.innerHTML=users.map(function(user){
+
+const isAdmin=
+String(user.email||"").toLowerCase()===
+ADMIN_EMAIL.toLowerCase();
+
+return `
+
+<div class="row">
+
+<div class="row-top">
+
+<strong>
+${esc(user.name||"بدون اسم")}
+</strong>
+
+<span class="status">
+${user.blocked?"محظور":"نشط"}
+</span>
+
+</div>
+
+<p>
+${esc(user.email)}
+</p>
+
+${
+isAdmin
+?
+"<small>حساب الإدارة</small>"
+:
+`
+<div class="actions">
+
+<button
+class="${user.blocked?"success":"danger"}"
+data-user="${user.id}"
+data-block="${user.blocked?"false":"true"}"
+>
+${user.blocked?"إلغاء الحظر":"حظر الحساب"}
+</button>
+
+</div>
+`
+}
+
+</div>
+
+`;
+
+}).join("");
+
+usersList
+.querySelectorAll("button[data-user]")
+.forEach(function(button){
+
+button.addEventListener("click",async function(){
+
+const userId=button.dataset.user;
+
+const blocked=
+button.dataset.block==="true";
+
+try{
+
+await updateDoc(
+doc(db,"users",userId),
+{
+blocked:blocked
+}
+);
+
+await loadUsers();
+
+}catch(error){
+
+alert(
+"تعذر تعديل الحساب."
+);
+
+}
+
+});
+
+});
+
+}
+
+onAuthStateChanged(auth,async function(user){
+
+if(!user){
+
+checking.classList.add("hidden");
+
+denied.classList.remove("hidden");
+
+return;
+
+}
+
+const isAdmin=
+String(user.email||"").toLowerCase()===
+ADMIN_EMAIL.toLowerCase();
+
+if(!isAdmin){
+
+checking.classList.add("hidden");
+
+denied.classList.remove("hidden");
+
+setTimeout(function(){
+
+window.location.href="index.html";
+
+},1500);
+
+return;
+
+}
+
+checking.classList.add("hidden");
+
+adminPanel.classList.remove("hidden");
+
+await loadApps();
+
+await loadUsers();
+
+});
+
+</script>
+
+</body>
+</html>

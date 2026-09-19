@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1"
+>
+
+<title>الحساب - migo store</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+html,body{
+margin:0;
+padding:0;
+width:100%;
+overflow-x:hidden;
+}
+
+body{
+font-family:Arial,Tahoma,sans-serif;
+background:#f5f5f5;
+color:#222;
+}
+
+header{
+background:#fff;
+border-bottom:1px solid #ddd;
+}
+
+.nav{
+width:100%;
+max-width:1100px;
+margin:auto;
+padding:12px 16px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:15px;
+}
+
+.logo{
+font-weight:bold;
+font-size:22px;
+}
+
+.navlinks{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+}
+
+.navlinks a{
+padding:9px 11px;
+border-radius:8px;
+font-size:14px;
+}
+
+.navlinks a:hover{
+background:#eee;
+}
+
+.container{
+width:100%;
+max-width:800px;
+margin:auto;
+padding:25px 16px;
+}
+
+.card{
+background:#fff;
+border:1px solid #ddd;
+border-radius:15px;
+padding:20px;
+}
+
+.info{
+padding:13px;
+background:#f2f2f2;
+border-radius:10px;
+margin-top:12px;
+word-break:break-word;
+}
+
+button{
+width:100%;
+padding:12px;
+border:0;
+border-radius:9px;
+background:#222;
+color:#fff;
+cursor:pointer;
+margin-top:12px;
+}
+
+.status{
+margin-top:12px;
+color:#666;
+}
+
+.hidden{
+display:none!important;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+margin-top:15px;
+}
+
+.app{
+border:1px solid #ddd;
+border-radius:12px;
+padding:12px;
+background:#fafafa;
+}
+
+@media(max-width:700px){
+
+.nav{
+flex-direction:column;
+align-items:stretch;
+}
+
+.navlinks{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+}
+
+.navlinks a{
+text-align:center;
+background:#f2f2f2;
+}
+
+.container{
+padding:18px 12px;
+}
+
+.grid{
+grid-template-columns:1fr;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="nav">
+
+<div class="logo">
+migo store
+</div>
+
+<nav class="navlinks">
+
+<a href="index.html">الرئيسية</a>
+
+<a href="apps.html">التطبيقات</a>
+
+<a href="login.html">تسجيل الدخول</a>
+
+<a href="account.html">الحساب</a>
+
+<a href="upload.html">رفع تطبيق</a>
+
+<a
+href="admin.html"
+id="adminLink"
+class="hidden"
+>
+الإدارة
+</a>
+
+</nav>
+
+</div>
+
+</header>
+
+<main class="container">
+
+<div class="card">
+
+<h1>حسابي</h1>
+
+<div id="loading">
+جاري التحقق من الحساب...
+</div>
+
+<div id="accountBox" class="hidden">
+
+<div>
+البريد الإلكتروني:
+</div>
+
+<div
+class="info"
+id="email"
+></div>
+
+<button id="logoutBtn">
+تسجيل الخروج
+</button>
+
+<h2>
+تطبيقاتي
+</h2>
+
+<div
+id="myApps"
+class="grid"
+>
+</div>
+
+</div>
+
+</div>
+
+</main>
+
+<script type="module">
+
+import {
+initializeApp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+import {
+getAuth,
+onAuthStateChanged,
+signOut
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+import {
+getFirestore,
+collection,
+query,
+where,
+getDocs
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyDIVIiWxAGPRN1diUfnX3VG4XFEkhpQqi8",
+authDomain:"migo-store.firebaseapp.com",
+projectId:"migo-store",
+storageBucket:"migo-store.firebasestorage.app",
+messagingSenderId:"418438022956",
+appId:"1:418438022956:web:832586300ca651a3124e89",
+measurementId:"G-SMNL93EJSE"
+};
+
+const ADMIN_EMAIL="amgadgad358@gmail.com";
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+const loading=document.getElementById("loading");
+const accountBox=document.getElementById("accountBox");
+const email=document.getElementById("email");
+const myApps=document.getElementById("myApps");
+const logoutBtn=document.getElementById("logoutBtn");
+const adminLink=document.getElementById("adminLink");
+
+function esc(value){
+
+return String(value||"").replace(/[&<>"']/g,function(char){
+
+return {
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[char];
+
+});
+
+}
+
+async function loadMyApps(user){
+
+try{
+
+const result=await getDocs(
+query(
+collection(db,"apps"),
+where("ownerId","==",user.uid)
+)
+);
+
+const apps=result.docs.map(function(item){
+
+return item.data();
+
+});
+
+if(!apps.length){
+
+myApps.innerHTML=
+"<p>لم ترفع أي تطبيق بعد.</p>";
+
+return;
+
+}
+
+myApps.innerHTML=apps.map(function(item){
+
+let state="قيد المراجعة";
+
+if(item.status==="approved"){
+state="تمت الموافقة";
+}
+
+if(item.status==="rejected"){
+state="مرفوض";
+}
+
+return `
+<div class="app">
+
+<strong>
+${esc(item.name)}
+</strong>
+
+<p>
+${esc(item.description)}
+</p>
+
+<small>
+الحالة: ${state}
+</small>
+
+</div>
+`;
+
+}).join("");
+
+}catch(error){
+
+myApps.innerHTML=
+"<p>تعذر تحميل التطبيقات.</p>";
+
+}
+
+}
+
+logoutBtn.addEventListener("click",async function(){
+
+await signOut(auth);
+
+});
+
+onAuthStateChanged(auth,function(user){
+
+if(!user){
+
+window.location.href="login.html";
+
+return;
+
+}
+
+loading.classList.add("hidden");
+
+accountBox.classList.remove("hidden");
+
+email.textContent=user.email||"";
+
+const isAdmin=
+String(user.email||"").toLowerCase()===
+ADMIN_EMAIL.toLowerCase();
+
+adminLink.classList.toggle("hidden",!isAdmin);
+
+loadMyApps(user);
+
+});
+
+</script>
+
+</body>
+</html>

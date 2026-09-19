@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1"
+>
+
+<title>رفع تطبيق - migo store</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+html,body{
+margin:0;
+padding:0;
+width:100%;
+overflow-x:hidden;
+}
+
+body{
+font-family:Arial,Tahoma,sans-serif;
+background:#f5f5f5;
+color:#222;
+}
+
+header{
+background:#fff;
+border-bottom:1px solid #ddd;
+}
+
+.nav{
+width:100%;
+max-width:1100px;
+margin:auto;
+padding:12px 16px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:15px;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+}
+
+.navlinks{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+}
+
+.navlinks a{
+padding:9px 11px;
+border-radius:8px;
+font-size:14px;
+}
+
+.navlinks a:hover{
+background:#eee;
+}
+
+.container{
+width:100%;
+max-width:750px;
+margin:auto;
+padding:25px 16px;
+}
+
+.card{
+background:#fff;
+border:1px solid #ddd;
+border-radius:15px;
+padding:20px;
+}
+
+.form{
+display:grid;
+gap:14px;
+}
+
+.field{
+display:grid;
+gap:7px;
+}
+
+.field label{
+font-size:14px;
+font-weight:bold;
+}
+
+input,
+textarea,
+select{
+width:100%;
+padding:12px;
+min-height:44px;
+border:1px solid #ccc;
+border-radius:9px;
+font-size:16px;
+background:#fff;
+color:#222;
+}
+
+textarea{
+min-height:120px;
+resize:vertical;
+}
+
+small{
+color:#777;
+}
+
+button{
+width:100%;
+padding:12px;
+min-height:45px;
+border:0;
+border-radius:9px;
+background:#222;
+color:#fff;
+font-size:15px;
+cursor:pointer;
+}
+
+button:disabled{
+opacity:.6;
+cursor:not-allowed;
+}
+
+.status{
+padding:10px;
+color:#666;
+line-height:1.6;
+}
+
+.progress{
+height:7px;
+background:#eee;
+border-radius:10px;
+overflow:hidden;
+}
+
+.progress div{
+width:0;
+height:100%;
+background:#222;
+transition:.2s;
+}
+
+.hidden{
+display:none!important;
+}
+
+@media(max-width:700px){
+
+.nav{
+flex-direction:column;
+align-items:stretch;
+}
+
+.navlinks{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+}
+
+.navlinks a{
+text-align:center;
+background:#f2f2f2;
+}
+
+.container{
+padding:15px 12px;
+}
+
+.card{
+padding:15px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="nav">
+
+<div class="logo">
+migo store
+</div>
+
+<nav class="navlinks">
+
+<a href="index.html">الرئيسية</a>
+
+<a href="apps.html">التطبيقات</a>
+
+<a href="login.html">تسجيل الدخول</a>
+
+<a href="account.html">الحساب</a>
+
+<a href="upload.html">رفع تطبيق</a>
+
+<a
+href="admin.html"
+id="adminLink"
+class="hidden"
+>
+الإدارة
+</a>
+
+</nav>
+
+</div>
+
+</header>
+
+<main class="container">
+
+<div class="card">
+
+<h1>رفع تطبيق</h1>
+
+<p>
+يجب تسجيل الدخول أولاً.
+</p>
+
+<form
+id="uploadForm"
+class="form hidden"
+>
+
+<div class="field">
+
+<label>
+اسم التطبيق
+</label>
+
+<input
+id="appName"
+required
+maxlength="80"
+>
+
+</div>
+
+<div class="field">
+
+<label>
+الوصف
+</label>
+
+<textarea
+id="description"
+required
+maxlength="500"
+></textarea>
+
+</div>
+
+<div class="field">
+
+<label>
+الإصدار
+</label>
+
+<input
+id="version"
+value="1.0"
+maxlength="30"
+>
+
+</div>
+
+<div class="field">
+
+<label>
+التصنيف
+</label>
+
+<select id="category">
+
+<option>ألعاب</option>
+<option>تطبيقات</option>
+<option>تعليم</option>
+<option>أدوات</option>
+<option>ترفيه</option>
+<option>أخرى</option>
+
+</select>
+
+</div>
+
+<div class="field">
+
+<label>
+أيقونة التطبيق
+</label>
+
+<input
+id="icon"
+type="file"
+accept="image/png,image/jpeg,image/webp"
+required
+>
+
+<small>
+الحد الأقصى 5MB
+</small>
+
+</div>
+
+<div class="field">
+
+<label>
+ملف APK
+</label>
+
+<input
+id="apk"
+type="file"
+accept=".apk,application/vnd.android.package-archive"
+required
+>
+
+<small>
+الحد الأقصى 50MB
+</small>
+
+</div>
+
+<div class="progress">
+<div id="progress"></div>
+</div>
+
+<button
+id="uploadBtn"
+type="submit"
+>
+إرسال للمراجعة
+</button>
+
+</form>
+
+<div
+id="status"
+class="status"
+>
+جاري التحقق...
+</div>
+
+</div>
+
+</main>
+
+<script type="module">
+
+import {
+initializeApp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+import {
+getAuth,
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+import {
+getFirestore,
+doc,
+getDoc,
+setDoc,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyDIVIiWxAGPRN1diUfnX3VG4XFEkhpQqi8",
+authDomain:"migo-store.firebaseapp.com",
+projectId:"migo-store",
+storageBucket:"migo-store.firebasestorage.app",
+messagingSenderId:"418438022956",
+appId:"1:418438022956:web:832586300ca651a3124e89",
+measurementId:"G-SMNL93EJSE"
+};
+
+const ADMIN_EMAIL="amgadgad358@gmail.com";
+
+const SUPABASE_URL=
+"https://htxrcnnnwieljcwtehja.supabase.co";
+
+const SUPABASE_ANON_KEY=
+"sb_publishable_sjeYQmO6nHfw5Z9ksWCesQ_OiBk0p2Y";
+
+const SUPABASE_BUCKET="apps";
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+const form=document.getElementById("uploadForm");
+const status=document.getElementById("status");
+const adminLink=document.getElementById("adminLink");
+const progress=document.getElementById("progress");
+
+let currentUser=null;
+
+function esc(value){
+
+return String(value||"").replace(/[&<>"']/g,function(char){
+
+return {
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[char];
+
+});
+
+}
+
+async function getProfile(user){
+
+const reference=doc(db,"users",user.uid);
+const snapshot=await getDoc(reference);
+
+if(!snapshot.exists()){
+
+await setDoc(reference,{
+
+uid:user.uid,
+email:user.email||"",
+name:user.displayName||"",
+photoURL:user.photoURL||"",
+blocked:false,
+createdAt:serverTimestamp()
+
+});
+
+return {
+blocked:false
+};
+
+}
+
+return snapshot.data();
+
+}
+
+async function uploadFile(path,file){
+
+const encodedPath=path
+.split("/")
+.map(encodeURIComponent)
+.join("/");
+
+const url=
+SUPABASE_URL+
+"/storage/v1/object/"+
+SUPABASE_BUCKET+
+"/"+
+encodedPath;
+
+const response=await fetch(url,{
+
+method:"POST",
+
+headers:{
+apikey:SUPABASE_ANON_KEY,
+"Content-Type":
+file.type||"application/octet-stream",
+"x-upsert":"false"
+},
+
+body:file
+
+});
+
+if(!response.ok){
+
+let message="";
+
+try{
+
+message=await response.text();
+
+}catch(error){}
+
+throw new Error(
+"فشل رفع الملف: "+
+response.status+
+" "+
+message
+);
+
+}
+
+return (
+SUPABASE_URL+
+"/storage/v1/object/public/"+
+SUPABASE_BUCKET+
+"/"+
+encodedPath
+);
+
+}
+
+onAuthStateChanged(auth,async function(user){
+
+if(!user){
+
+window.location.href="login.html";
+
+return;
+
+}
+
+currentUser=user;
+
+const isAdmin=
+String(user.email||"").toLowerCase()===
+ADMIN_EMAIL.toLowerCase();
+
+adminLink.classList.toggle("hidden",!isAdmin);
+
+try{
+
+const profile=await getProfile(user);
+
+if(profile.blocked){
+
+status.textContent=
+"هذا الحساب محظور من رفع التطبيقات.";
+
+return;
+
+}
+
+form.classList.remove("hidden");
+
+status.textContent=
+"يمكنك الآن رفع التطبيق.";
+
+}catch(error){
+
+status.textContent=
+"تعذر التحقق من الحساب.";
+
+}
+
+});
+
+form.addEventListener("submit",async function(event){
+
+event.preventDefault();
+
+if(!currentUser){
+
+window.location.href="login.html";
+
+return;
+
+}
+
+const name=
+document.getElementById("appName").value.trim();
+
+const description=
+document.getElementById("description").value.trim();
+
+const version=
+document.getElementById("version").value.trim()||"1.0";
+
+const category=
+document.getElementById("category").value;
+
+const icon=
+document.getElementById("icon").files[0];
+
+const apk=
+document.getElementById("apk").files[0];
+
+if(!icon||!apk){
+
+status.textContent=
+"اختر الأيقونة وملف APK.";
+
+return;
+
+}
+
+if(icon.size>5*1024*1024){
+
+status.textContent=
+"الأيقونة أكبر من 5MB.";
+
+return;
+
+}
+
+if(apk.size>50*1024*1024){
+
+status.textContent=
+"ملف APK أكبر من 50MB.";
+
+return;
+
+}
+
+if(!/\.apk$/i.test(apk.name)){
+
+status.textContent=
+"اختر ملف APK صحيح.";
+
+return;
+
+}
+
+const uploadBtn=
+document.getElementById("uploadBtn");
+
+uploadBtn.disabled=true;
+
+progress.style.width="0%";
+
+try{
+
+const profile=await getProfile(currentUser);
+
+if(profile.blocked){
+
+throw new Error(
+"هذا الحساب محظور."
+);
+
+}
+
+const id=
+crypto.randomUUID();
+
+const iconExtension=
+(icon.name.split(".").pop()||"png");
+
+const iconPath=
+currentUser.uid+
+"/"+
+id+
+"/icon."+
+iconExtension;
+
+const apkPath=
+currentUser.uid+
+"/"+
+id+
+"/app.apk";
+
+status.textContent=
+"جاري رفع الأيقونة...";
+
+const iconUrl=
+await uploadFile(iconPath,icon);
+
+progress.style.width="35%";
+
+status.textContent=
+"جاري رفع ملف APK...";
+
+const apkUrl=
+await uploadFile(apkPath,apk);
+
+progress.style.width="85%";
+
+await setDoc(
+doc(db,"apps",id),
+{
+
+name:name,
+
+description:description,
+
+version:version,
+
+category:category,
+
+ownerId:currentUser.uid,
+
+ownerEmail:currentUser.email||"",
+
+ownerName:currentUser.displayName||"",
+
+iconUrl:iconUrl,
+
+apkUrl:apkUrl,
+
+iconPath:iconPath,
+
+apkPath:apkPath,
+
+status:"pending",
+
+downloads:0,
+
+createdAt:serverTimestamp()
+
+}
+);
+
+progress.style.width="100%";
+
+form.reset();
+
+status.textContent=
+"تم إرسال التطبيق للمراجعة بنجاح. لن يظهر للناس حتى توافق الإدارة.";
+
+}catch(error){
+
+console.error(error);
+
+status.textContent=
+"تعذر رفع التطبيق: "+
+(error.message||"خطأ غير معروف.");
+
+}
+
+uploadBtn.disabled=false;
+
+});
+
+</script>
+
+</body>
+</html>
