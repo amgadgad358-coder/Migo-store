@@ -296,20 +296,32 @@ $("uploadForm").addEventListener("submit",async ev=>{
    const id=crypto.randomUUID();
    const iconPath=`${currentUser.uid}/${id}/icon-${Date.now()}.${(icon.name.split(".").pop()||"png")}`;
    const apkPath=`${currentUser.uid}/${id}/app-${Date.now()}.apk`;
-   async function uploadOne(path,file,end){
+   async function uploadOne(path,file,startPercent,endPercent){
       return new Promise((resolve,reject)=>{
         const storageRef=ref(storage,path);
-        const uploadTask=uploadBytesResumable(storageRef,file);
+        const uploadTask=uploadBytesResumable(storageRef,file,{
+          contentType:file.type || (file.name.toLowerCase().endsWith(".apk")
+            ? "application/vnd.android.package-archive"
+            : "application/octet-stream")
+        });
         uploadTask.on("state_changed",
           (snapshot)=>{
-            const progress=(snapshot.bytesTransferred/snapshot.totalBytes)*end;
-            $("uploadProgress").style.width=progress+"%";
+            const ratio=snapshot.totalBytes ? snapshot.bytesTransferred/snapshot.totalBytes : 0;
+            const progress=startPercent+(ratio*(endPercent-startPercent));
+            $("uploadProgress").style.width=Math.min(100,Math.max(0,progress))+"%";
+            $("uploadStatus").textContent=`جاري رفع ${file.name} — ${Math.round(ratio*100)}%`;
           },
-          reject,
+          (error)=>{
+            console.error("Firebase Storage upload error:",error);
+            reject(new Error(`${error?.code || "unknown"}: ${error?.message || "خطأ غير معروف"}`));
+          },
           async()=>{
             try{
               resolve(await getDownloadURL(uploadTask.snapshot.ref));
-            }catch(err){reject(err);}
+            }catch(err){
+              console.error("Firebase Storage download URL error:",err);
+              reject(new Error(`${err?.code || "unknown"}: ${err?.message || "تعذر الحصول على رابط الملف"}`));
+            }
           }
         );
       });
