@@ -113,6 +113,7 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,addDoc,getDocs,updateDoc,deleteDoc,query,where,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL="https://htxrcnnnwieljctweja.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_sjeYQmO6nHfw5Z9ksWCesQ_OiBk0p2Y";
@@ -128,6 +129,7 @@ const firebaseConfig={
  measurementId:"G-SMNL93EJSE"
 };
 const ADMIN_EMAIL="amgadgad358@gmail.com";
+const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
 setPersistence(auth,browserLocalPersistence).catch(console.error);
@@ -300,35 +302,21 @@ $("uploadForm").addEventListener("submit",async ev=>{
    const iconPath=`${currentUser.uid}/${id}/icon-${Date.now()}.${(icon.name.split(".").pop()||"png")}`;
    const apkPath=`${currentUser.uid}/${id}/app-${Date.now()}.apk`;
    async function uploadOne(path,file,start,end){
-     const encodedPath=path.split("/").map(encodeURIComponent).join("/");
-     const url=SUPABASE_URL+"/storage/v1/object/"+SUPABASE_BUCKET+"/"+encodedPath;
-     let response;
-     try{
-       response=await fetch(url,{
-         method:"POST",
-         mode:"cors",
-         credentials:"omit",
-         headers:{
-           "apikey":SUPABASE_ANON_KEY,
-           "Authorization":"Bearer "+SUPABASE_ANON_KEY,
-           "Content-Type":file.type||"application/octet-stream",
-           "x-upsert":"false"
-         },
-         body:file
+     const {error}=await supabase.storage
+       .from(SUPABASE_BUCKET)
+       .upload(path,file,{
+         cacheControl:"3600",
+         contentType:file.type||"application/octet-stream",
+         upsert:false
        });
-     }catch(networkError){
-       throw new Error("فشل الاتصال بـ Supabase (Failed to fetch). راجع سياسة Storage في Supabase كما هو موضح في التعليمات.");
-     }
-     if(!response.ok){
-       let detail="";
-       try{
-         const text=await response.text();
-         try{const j=JSON.parse(text);detail=j.message||j.error_description||j.error||text;}catch(_){detail=text;}
-       }catch(_){}
-       throw new Error("Supabase upload "+response.status+(detail?": "+detail:""));
+     if(error){
+       console.error("Supabase Storage error:",error);
+       throw new Error(error.message||error.error||"تعذر رفع الملف إلى Supabase");
      }
      $("uploadProgress").style.width=end+"%";
-     return SUPABASE_URL+"/storage/v1/object/public/"+SUPABASE_BUCKET+"/"+encodedPath;
+     const {data}=supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
+     if(!data?.publicUrl) throw new Error("تعذر إنشاء رابط الملف العام.");
+     return data.publicUrl;
    }
    const iconUrl=await uploadOne(iconPath,icon,0,25);
    const apkUrl=await uploadOne(apkPath,apk,25,100);
