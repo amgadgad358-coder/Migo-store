@@ -113,11 +113,7 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,addDoc,getDocs,updateDoc,deleteDoc,query,where,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
-const SUPABASE_URL="https://htxrcnnnwieljctweja.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_sjeYQmO6nHfw5Z9ksWCesQ_OiBk0p2Y";
-const SUPABASE_BUCKET="apps";
+import {getStorage,ref,uploadBytesResumable,getDownloadURL} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
 
 const firebaseConfig={
  apiKey:"AIzaSyDIVIiWxAGPRN1diUfnX3VG4XFEKhpQqi8",
@@ -129,8 +125,7 @@ const firebaseConfig={
  measurementId:"G-SMNL93EJSE"
 };
 const ADMIN_EMAIL="amgadgad358@gmail.com";
-const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
 const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
 setPersistence(auth,browserLocalPersistence).catch(console.error);
 const $=id=>document.getElementById(id);
@@ -301,23 +296,24 @@ $("uploadForm").addEventListener("submit",async ev=>{
    const id=crypto.randomUUID();
    const iconPath=`${currentUser.uid}/${id}/icon-${Date.now()}.${(icon.name.split(".").pop()||"png")}`;
    const apkPath=`${currentUser.uid}/${id}/app-${Date.now()}.apk`;
-   async function uploadOne(path,file,start,end){
-     const {error}=await supabase.storage
-       .from(SUPABASE_BUCKET)
-       .upload(path,file,{
-         cacheControl:"3600",
-         contentType:file.type||"application/octet-stream",
-         upsert:false
-       });
-     if(error){
-       console.error("Supabase Storage error:",error);
-       throw new Error(error.message||error.error||"تعذر رفع الملف إلى Supabase");
-     }
-     $("uploadProgress").style.width=end+"%";
-     const {data}=supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
-     if(!data?.publicUrl) throw new Error("تعذر إنشاء رابط الملف العام.");
-     return data.publicUrl;
-   }
+   async function uploadOne(path,file,end){
+      return new Promise((resolve,reject)=>{
+        const storageRef=ref(storage,path);
+        const uploadTask=uploadBytesResumable(storageRef,file);
+        uploadTask.on("state_changed",
+          (snapshot)=>{
+            const progress=(snapshot.bytesTransferred/snapshot.totalBytes)*end;
+            $("uploadProgress").style.width=progress+"%";
+          },
+          reject,
+          async()=>{
+            try{
+              resolve(await getDownloadURL(uploadTask.snapshot.ref));
+            }catch(err){reject(err);}
+          }
+        );
+      });
+    }
    const iconUrl=await uploadOne(iconPath,icon,0,25);
    const apkUrl=await uploadOne(apkPath,apk,25,100);
    await setDoc(doc(db,"apps",id),{
