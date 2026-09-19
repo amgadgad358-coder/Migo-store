@@ -113,7 +113,10 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,addDoc,getDocs,updateDoc,deleteDoc,query,where,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import {getStorage,ref,uploadBytesResumable,getDownloadURL} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
+
+const SUPABASE_URL="https://htxrcnnnwieljctweja.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_sjeYQmO6nHfw5Z9ksWCesQ_OiBk0p2Y";
+const SUPABASE_BUCKET="apps";
 
 const firebaseConfig={
  apiKey:"AIzaSyDIVIiWxAGPRN1diUfnX3VG4XFEKhpQqi8",
@@ -125,7 +128,7 @@ const firebaseConfig={
  measurementId:"G-SMNL93EJSE"
 };
 const ADMIN_EMAIL="amgadgad358@gmail.com";
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
 setPersistence(auth,browserLocalPersistence).catch(console.error);
 const $=id=>document.getElementById(id);
@@ -296,36 +299,40 @@ $("uploadForm").addEventListener("submit",async ev=>{
    const id=crypto.randomUUID();
    const iconPath=`${currentUser.uid}/${id}/icon-${Date.now()}.${(icon.name.split(".").pop()||"png")}`;
    const apkPath=`${currentUser.uid}/${id}/app-${Date.now()}.apk`;
-   async function uploadOne(path,file,startPercent,endPercent){
-      return new Promise((resolve,reject)=>{
-        const storageRef=ref(storage,path);
-        const uploadTask=uploadBytesResumable(storageRef,file,{
-          contentType:file.type || (file.name.toLowerCase().endsWith(".apk")
-            ? "application/vnd.android.package-archive"
-            : "application/octet-stream")
-        });
-        uploadTask.on("state_changed",
-          (snapshot)=>{
-            const ratio=snapshot.totalBytes ? snapshot.bytesTransferred/snapshot.totalBytes : 0;
-            const progress=startPercent+(ratio*(endPercent-startPercent));
-            $("uploadProgress").style.width=Math.min(100,Math.max(0,progress))+"%";
-            $("uploadStatus").textContent=`جاري رفع ${file.name} — ${Math.round(ratio*100)}%`;
-          },
-          (error)=>{
-            console.error("Firebase Storage upload error:",error);
-            reject(new Error(`${error?.code || "unknown"}: ${error?.message || "خطأ غير معروف"}`));
-          },
-          async()=>{
-            try{
-              resolve(await getDownloadURL(uploadTask.snapshot.ref));
-            }catch(err){
-              console.error("Firebase Storage download URL error:",err);
-              reject(new Error(`${err?.code || "unknown"}: ${err?.message || "تعذر الحصول على رابط الملف"}`));
-            }
-          }
-        );
-      });
-    }
+   async function uploadOne(path,file,start,end){
+     // Firebase handles login/data; Supabase is used ONLY for file storage.
+     // Because Firebase tokens are not Supabase Auth tokens, we intentionally
+     // do not send a Firebase ID token to Supabase Storage. The Storage bucket
+     // must therefore have the small anonymous INSERT policy from the SQL file.
+     const encodedPath=path.split("/").map(encodeURIComponent).join("/");
+     const url=SUPABASE_URL+"/storage/v1/object/"+SUPABASE_BUCKET+"/"+encodedPath;
+     let response;
+     try{
+       response=await fetch(url,{
+         method:"POST",
+         mode:"cors",
+         credentials:"omit",
+         headers:{
+           "apikey":SUPABASE_ANON_KEY,
+           "Content-Type":file.type||"application/octet-stream",
+           "x-upsert":"false"
+         },
+         body:file
+       });
+     }catch(networkError){
+       throw new Error("فشل الاتصال بـ Supabase. تأكد من Project URL وStorage/CORS وإعدادات الشبكة.");
+     }
+     if(!response.ok){
+       let detail="";
+       try{
+         const text=await response.text();
+         try{const j=JSON.parse(text);detail=j.message||j.error_description||j.error||text;}catch(_){detail=text;}
+       }catch(_){}
+       throw new Error("Supabase Storage "+response.status+(detail?": "+detail:""));
+     }
+     $("uploadProgress").style.width=end+"%";
+     return SUPABASE_URL+"/storage/v1/object/public/"+SUPABASE_BUCKET+"/"+encodedPath;
+   }
    const iconUrl=await uploadOne(iconPath,icon,0,25);
    const apkUrl=await uploadOne(apkPath,apk,25,100);
    await setDoc(doc(db,"apps",id),{
