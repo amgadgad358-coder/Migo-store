@@ -169,8 +169,6 @@ window.downloadApp=async id=>{
 window.startGoogleLogin=async()=>{
  status("جاري فتح تسجيل الدخول باستخدام Google…");
  try{
-   // GitHub Pages + Firebase Auth: popup avoids the cross-origin storage
-   // issue that can break signInWithRedirect in modern browsers.
    const result=await signInWithPopup(auth,provider);
    if(result?.user) status("تم تسجيل الدخول بالحساب: "+(result.user.email||""));
  }catch(e){
@@ -207,8 +205,6 @@ function renderUser(user,data){
  $("userBox").classList.add("show");
  $("userEmail").textContent=(user.displayName||"")+" — "+user.email;
  isAdmin=(user.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
-
- // بعد تسجيل الدخول نخفي واجهة تسجيل الدخول بالكامل.
  $("account").classList.add("hidden");
  $("accountNav").classList.add("hidden");
 
@@ -300,10 +296,6 @@ $("uploadForm").addEventListener("submit",async ev=>{
    const iconPath=`${currentUser.uid}/${id}/icon-${Date.now()}.${(icon.name.split(".").pop()||"png")}`;
    const apkPath=`${currentUser.uid}/${id}/app-${Date.now()}.apk`;
    async function uploadOne(path,file,start,end){
-     // Firebase handles login/data; Supabase is used ONLY for file storage.
-     // Because Firebase tokens are not Supabase Auth tokens, we intentionally
-     // do not send a Firebase ID token to Supabase Storage. The Storage bucket
-     // must therefore have the small anonymous INSERT policy from the SQL file.
      const encodedPath=path.split("/").map(encodeURIComponent).join("/");
      const url=SUPABASE_URL+"/storage/v1/object/"+SUPABASE_BUCKET+"/"+encodedPath;
      let response;
@@ -368,7 +360,6 @@ onAuthStateChanged(auth,async user=>{
    return;
  }
  try{
-   // إظهار حالة تسجيل الدخول فورًا؛ لا نجعل Firestore يمنع ظهور الحساب.
    renderUser(user,{blocked:false});
    status("تم تسجيل الدخول بالحساب: "+user.email);
 
