@@ -35,6 +35,7 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 .upload-fab:hover{background:#171d26}
 .upload-fab .plus{font-size:17px;line-height:1;color:#9b7cff}
 @media(max-width:760px){.grid,.admin-grid{grid-template-columns:1fr}.hero{padding-top:50px}.hero h1{font-size:38px}.nav{align-items:flex-start}.navlinks{gap:10px}}
+.comments{display:grid;gap:10px;margin-top:18px}.comment{padding:12px;border:1px solid #252e39;border-radius:12px;background:#0d1218}.comment-head{display:flex;justify-content:space-between;gap:10px;font-size:13px}.comment-name{font-weight:800}.comment-date{color:#707b89;font-size:11px}.comment-text{margin-top:7px;color:#c5ccd5;line-height:1.7;white-space:pre-wrap}.like-btn.liked{background:#2b1f4a;color:#c8b7ff}.detail-icon{width:110px;height:110px;border-radius:24px;object-fit:cover;background:#171d26;border:1px solid #29313c}.back-btn{margin-bottom:15px}
 .logout-fab{position:fixed;left:18px;bottom:18px;z-index:1000;border:0;border-radius:999px;padding:11px 16px;background:#222;color:#fff;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.22)}
 .logout-fab:hover{transform:translateY(-1px)}
 .logout-fab.hidden{display:none}
@@ -55,6 +56,8 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
   <div class="section-title"><h2>التطبيقات والألعاب</h2><span class="muted" id="appsCount"></span></div>
   <div id="appsGrid" class="grid"><div class="empty">جاري تحميل التطبيقات…</div></div>
 </section>
+<section class="section hidden" id="appPage"><div id="appDetails"></div></section>
+
 <section class="section" id="account">
   <div class="auth-wrap"><div class="auth-card">
     <h2>حسابك في migo store</h2>
@@ -117,19 +120,20 @@ const firebaseConfig={
  appId:"1:418438022956:web:832586300ca651a3124e89",
  measurementId:"G-SMNL93EJSE"
 };
-const ADMIN_EMAIL="amgadgad358@gmail.com";
+const OWNER_EMAIL="amgadgad358@gmail.com";
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
 setPersistence(auth,browserLocalPersistence).catch(console.error);
 const $=id=>document.getElementById(id);
-let currentUser=null,isAdmin=false;
+let currentUser=null,isAdmin=false,isOwner=false;
 function status(msg,id="authStatus"){ $(id).textContent=msg||""; }
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function dateText(ts){if(!ts?.toDate)return "";return ts.toDate().toLocaleString("ar-EG");}
 async function ensureProfile(user){
  const r=doc(db,"users",user.uid), snap=await getDoc(r);
- if(!snap.exists()) await setDoc(r,{uid:user.uid,email:user.email||"",name:user.displayName||"",photoURL:user.photoURL||"",blocked:false,createdAt:serverTimestamp()});
+ if(!snap.exists()) await setDoc(r,{uid:user.uid,email:user.email||"",name:user.displayName||"",photoURL:user.photoURL||"",blocked:false,isAdmin:(user.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase(),createdAt:serverTimestamp()});
+ else if((user.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase() && snap.data().isAdmin!==true) await updateDoc(r,{isAdmin:true,blocked:false});
  return (await getDoc(r)).data();
 }
 async function loadPublicApps(){
@@ -139,13 +143,51 @@ async function loadPublicApps(){
    const apps=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
    $("appsCount").textContent=apps.length+" تطبيق";
    if(!apps.length){grid.innerHTML='<div class="empty">لا توجد تطبيقات منشورة حتى الآن.</div>';return;}
-   grid.innerHTML=apps.map(a=>`<article class="card">
+   grid.innerHTML=apps.map(a=>`<article class="card" onclick="openApp('${a.id}')" style="cursor:pointer">
      <div class="app-top"><img class="app-icon" src="${esc(a.iconUrl)}" alt=""><div><h3 class="app-name">${esc(a.name)}</h3><p class="app-desc">${esc(a.description)}</p></div></div>
      <div class="app-meta">${esc(a.category||"أخرى")} · الإصدار ${esc(a.version||"1.0")} · ${Number(a.downloads||0)} تحميل</div>
-     <div class="actions"><button class="btn primary" onclick="downloadApp('${a.id}')">تحميل APK</button></div>
+     <div class="actions"><button class="btn primary" onclick="event.stopPropagation();openApp('${a.id}')">عرض اللعبة</button></div>
    </article>`).join("");
  }catch(e){console.error(e);grid.innerHTML='<div class="empty">تعذر تحميل التطبيقات. تأكد من إعداد Firestore والقواعد.</div>';}
 }
+window.openApp=async id=>{
+ try{
+  const s=await getDoc(doc(db,"apps",id)); if(!s.exists()||s.data().status!=="approved")return;
+  const a={id,...s.data()};
+  location.hash="app/"+id;
+  await renderAppPage(a);
+ }catch(e){console.error(e);}
+};
+async function renderAppPage(a){
+ $("home").querySelectorAll(':scope > section').forEach(x=>x.classList.add('hidden'));
+ $("appPage").classList.remove('hidden');
+ let liked=false,likeCount=0,comments=[];
+ try{likeCount=(await getDocs(collection(db,"apps",a.id,"likes"))).size; if(currentUser) liked=(await getDoc(doc(db,"apps",a.id,"likes",currentUser.uid))).exists(); comments=(await getDocs(collection(db,"apps",a.id,"comments"))).docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>(y.createdAt?.seconds||0)-(x.createdAt?.seconds||0));}catch(e){console.error(e);}
+ const commentsHtml=comments.length?comments.map(c=>`<div class="comment"><div class="comment-head"><span class="comment-name">${esc(c.name||c.email||"مستخدم")}</span><span class="comment-date">${dateText(c.createdAt)}</span></div><div class="comment-text">${esc(c.text)}</div></div>`).join(''):'<div class="empty">لا توجد تعليقات بعد.</div>';
+ $("appDetails").innerHTML=`<button class="btn ghost back-btn" onclick="goHome()">← العودة للتطبيقات</button><div class="panel"><div class="app-top"><img class="detail-icon" src="${esc(a.iconUrl)}" alt=""><div><h2 class="app-name">${esc(a.name)}</h2><p class="app-desc">${esc(a.description)}</p><div class="app-meta">${esc(a.category||"أخرى")} · الإصدار ${esc(a.version||"1.0")} · ${Number(a.downloads||0)} تحميل</div></div></div><div class="actions"><button class="btn primary" onclick="downloadApp('${a.id}')">تحميل APK</button><button class="btn ghost like-btn ${liked?'liked':''}" id="likeBtn" onclick="toggleLike('${a.id}')">♥ إعجاب <span id="likeCount">${likeCount}</span></button></div></div><div class="panel" style="margin-top:18px"><h3 style="margin-top:0">التعليقات</h3><div class="field"><textarea id="commentInput" maxlength="1000" placeholder="اكتب تعليقك..."></textarea></div><div class="actions"><button class="btn primary" onclick="addComment('${a.id}')">إضافة تعليق</button></div><div class="comments">${commentsHtml}</div></div>`;
+}
+window.toggleLike=async id=>{
+ if(!currentUser){alert("سجّل الدخول أولًا لإضافة إعجاب.");location.hash="account";return;}
+ const ref=doc(db,"apps",id,"likes",currentUser.uid),snap=await getDoc(ref);
+ if(snap.exists()) await deleteDoc(ref); else await setDoc(ref,{userId:currentUser.uid,createdAt:serverTimestamp()});
+ const count=(await getDocs(collection(db,"apps",id,"likes"))).size; const btn=$("likeBtn"); if(btn){btn.classList.toggle('liked',!snap.exists()); $("likeCount").textContent=count;}
+};
+window.addComment=async id=>{
+ if(!currentUser){alert("سجّل الدخول أولًا لكتابة تعليق.");location.hash="account";return;}
+ const input=$("commentInput"),text=input?.value.trim(); if(!text)return;
+ const p=await ensureProfile(currentUser);
+ await addDoc(collection(db,"apps",id,"comments"),{userId:currentUser.uid,email:currentUser.email||"",name:p?.name||currentUser.displayName||currentUser.email||"مستخدم",photoURL:p?.photoURL||currentUser.photoURL||"",text,createdAt:serverTimestamp()});
+ const s=await getDoc(doc(db,"apps",id)); if(s.exists()) await renderAppPage({id,...s.data()});
+};
+window.goHome=()=>{location.hash="apps";renderRoute();};
+async function renderRoute(){
+ const h=location.hash||"#home";
+ if(h.startsWith("#app/")){const id=h.slice(5);const s=await getDoc(doc(db,"apps",id));if(s.exists()&&s.data().status==="approved")return renderAppPage({id,...s.data()});}
+ $("appPage").classList.add('hidden'); $("home").querySelectorAll(':scope > section').forEach(x=>x.classList.remove('hidden'));
+ const target=h.slice(1)||'home'; const el=$(target); if(el) el.scrollIntoView({behavior:'smooth'});
+}
+window.addEventListener('hashchange',renderRoute);
+
 window.downloadApp=async id=>{
  try{
    const s=await getDoc(doc(db,"apps",id)); if(!s.exists())return;
@@ -180,7 +222,7 @@ window.startGoogleLogin=async()=>{
 window.signOutLocal=async()=>{
  const btn=document.querySelector('#userBox .ghost'); if(btn) btn.disabled=true;
  try{
-  await signOut(auth); currentUser=null; isAdmin=false;
+  await signOut(auth); currentUser=null; isAdmin=false; isOwner=false;
   $("logoutFab").classList.add("hidden");
   $("userBox").classList.remove("show"); $("account").classList.remove("hidden"); $("accountNav").classList.remove("hidden");
   $("upload").classList.add("hidden"); $("uploadFab").classList.remove("show"); $("myAppsSection").classList.add("hidden"); $("admin").classList.add("hidden"); $("adminBadge").classList.add("hidden");
@@ -191,7 +233,8 @@ function renderUser(user,data){
  $("logoutFab").classList.remove("hidden");
  $("userBox").classList.add("show");
  $("userEmail").textContent=(user.displayName||"")+" — "+user.email;
- isAdmin=(user.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
+ isOwner=(user.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase();
+ isAdmin=isOwner || data?.isAdmin===true;
  $("account").classList.add("hidden");
  $("accountNav").classList.add("hidden");
  $("adminBadge").classList.toggle("hidden",!isAdmin);
@@ -228,11 +271,11 @@ async function loadAdmin(){
     <button class="btn ghost" onclick="deleteAppAdmin('${a.id}')">حذف</button>
    </div>
  </div>`).join(""):'<div class="empty">لا توجد طلبات.</div>';
- $("adminUsers").innerHTML=users.length?users.map(u=>`<div class="row">
-   <div class="row-top"><strong>${esc(u.name||"بدون اسم")}</strong><span class="tag">${u.blocked?"محظور":"نشط"}</span></div>
+ $("adminUsers").innerHTML=users.length?users.map(u=>{const owner=(u.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase();return `<div class="row">
+   <div class="row-top"><strong>${esc(u.name||"بدون اسم")}</strong><span class="tag">${owner?"OWNER":u.isAdmin?"ADMIN":u.blocked?"محظور":"نشط"}</span></div>
    <small>${esc(u.email||"")}</small>
-   <div class="actions">${u.email?.toLowerCase()!==ADMIN_EMAIL.toLowerCase()?`<button class="btn ${u.blocked?"success":"danger"}" onclick="toggleBlock('${u.id}',${!u.blocked})">${u.blocked?"إلغاء الحظر":"حظر الحساب"}</button>`:"<span class='muted'>حساب الإدارة</span>"}</div>
- </div>`).join(""):'<div class="empty">لا توجد حسابات.</div>';
+   <div class="actions">${owner?"<span class='muted'>حساب Owner محمي</span>":isOwner?`<button class="btn ${u.isAdmin?"ghost":"success"}" onclick="setUserAdmin('${u.id}',${!u.isAdmin})">${u.isAdmin?"إزالة Admin":"تعيين Admin"}</button><button class="btn ${u.blocked?"success":"danger"}" onclick="toggleBlock('${u.id}',${!u.blocked})">${u.blocked?"إلغاء الحظر":"حظر الحساب"}</button><button class="btn danger" onclick="deleteUserAdmin('${u.id}')">حذف الحساب</button>`:"<span class='muted'>إدارة الحسابات متاحة للـ Owner فقط</span>"}</div>
+ </div>`}).join(""):'<div class="empty">لا توجد حسابات.</div>';
 }
 window.setAppStatus=async(id,newStatus)=>{
  if(!isAdmin)return;
@@ -240,10 +283,13 @@ window.setAppStatus=async(id,newStatus)=>{
  catch(e){alert("تعذر تحديث حالة التطبيق: "+e.message);}
 };
 window.toggleBlock=async(uid,blocked)=>{
- if(!isAdmin)return;
- try{await updateDoc(doc(db,"users",uid),{blocked});await loadAdmin();}
+ if(!isOwner)return;
+ try{const s=await getDoc(doc(db,"users",uid));if(!s.exists()||(s.data().email||"").toLowerCase()===OWNER_EMAIL.toLowerCase())return;await updateDoc(doc(db,"users",uid),{blocked});await loadAdmin();}
  catch(e){alert("تعذر تغيير حالة الحساب: "+e.message);}
 };
+window.setUserAdmin=async(uid,makeAdmin)=>{if(!isOwner)return;const s=await getDoc(doc(db,"users",uid));if(!s.exists())return;const u=s.data();if((u.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase())return;await updateDoc(doc(db,"users",uid),{isAdmin:makeAdmin});await loadAdmin();};
+window.deleteUserAdmin=async uid=>{if(!isOwner)return;const s=await getDoc(doc(db,"users",uid));if(!s.exists())return;const u=s.data();if((u.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase()){alert("لا يمكن حذف حساب Owner.");return;}if(!confirm(`هل تريد حذف الحساب ${u.email||""}؟`))return;await deleteDoc(doc(db,"users",uid));await loadAdmin();};
+
 window.deleteAppAdmin=async id=>{
  if(!isAdmin)return;
  if(!confirm("هل تريد حذف هذا التطبيق نهائيًا؟"))return;
@@ -342,6 +388,7 @@ onAuthStateChanged(auth,async user=>{
  }
 });
 loadPublicApps();
+renderRoute();
 </script>
 </body>
 </html>
