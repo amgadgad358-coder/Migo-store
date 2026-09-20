@@ -34,9 +34,7 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 .upload-fab.show{display:flex}
 .upload-fab:hover{background:#171d26}
 .upload-fab .plus{font-size:17px;line-height:1;color:#9b7cff}
-
 @media(max-width:760px){.grid,.admin-grid{grid-template-columns:1fr}.hero{padding-top:50px}.hero h1{font-size:38px}.nav{align-items:flex-start}.navlinks{gap:10px}}
-
 .logout-fab{position:fixed;left:18px;bottom:18px;z-index:1000;border:0;border-radius:999px;padding:11px 16px;background:#222;color:#fff;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.22)}
 .logout-fab:hover{transform:translateY(-1px)}
 .logout-fab.hidden{display:none}
@@ -51,15 +49,12 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 <button class="upload-fab" id="uploadFab" type="button" onclick="openUpload()">
   <span class="plus">+</span><span>رفع تطبيق</span>
 </button>
-
 <main id="home">
 <section class="hero"><h1><span>migo</span> store</h1><p>تطبيقات وألعاب مجانية، يرفعها المستخدمون وتُنشر بعد مراجعة الإدارة.</p></section>
-
 <section class="section" id="apps">
   <div class="section-title"><h2>التطبيقات والألعاب</h2><span class="muted" id="appsCount"></span></div>
   <div id="appsGrid" class="grid"><div class="empty">جاري تحميل التطبيقات…</div></div>
 </section>
-
 <section class="section" id="account">
   <div class="auth-wrap"><div class="auth-card">
     <h2>حسابك في migo store</h2>
@@ -76,7 +71,6 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
     </div>
   </div></div>
 </section>
-
 <section class="section hidden" id="upload">
   <div class="section-title"><h2>رفع تطبيق أو لعبة</h2><span class="muted">يتم النشر بعد موافقة الإدارة</span></div>
   <div class="panel">
@@ -93,12 +87,10 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
     </form>
   </div>
 </section>
-
 <section class="section hidden" id="myAppsSection">
   <div class="section-title"><h2>تطبيقاتي</h2><span class="muted">حالة كل طلب</span></div>
   <div id="myApps" class="grid"></div>
 </section>
-
 <section class="section hidden" id="admin">
   <div class="section-title"><h2>لوحة الإدارة</h2><span class="muted">إدارة التطبيقات والحسابات</span></div>
   <div class="admin-grid">
@@ -108,17 +100,14 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 </section>
 </main>
 <footer>migo store</footer>
-
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,addDoc,getDocs,updateDoc,deleteDoc,query,where,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
 const SUPABASE_URL="https://htxrcnnnwieljctweja.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_sjeYQmO6nHfw5Z9ksWCesQ_OiBk0p2Y";
 const SUPABASE_BUCKET="apps";
-
 const firebaseConfig={
  apiKey:"AIzaSyDIVIiWxAGPRN1diUfnX3VG4XFEKhpQqi8",
  authDomain:"migo-store.firebaseapp.com",
@@ -128,28 +117,19 @@ const firebaseConfig={
  appId:"1:418438022956:web:832586300ca651a3124e89",
  measurementId:"G-SMNL93EJSE"
 };
-const OWNER_EMAIL="amgadgad358@gmail.com";
-const ADMIN_EMAIL=OWNER_EMAIL;
+const ADMIN_EMAIL="amgadgad358@gmail.com";
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
 setPersistence(auth,browserLocalPersistence).catch(console.error);
 const $=id=>document.getElementById(id);
-let currentUser=null,isAdmin=false,isOwner=false;
-
+let currentUser=null,isAdmin=false;
 function status(msg,id="authStatus"){ $(id).textContent=msg||""; }
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function dateText(ts){if(!ts?.toDate)return "";return ts.toDate().toLocaleString("ar-EG");}
-
 async function ensureProfile(user){
  const r=doc(db,"users",user.uid), snap=await getDoc(r);
- const owner=(user.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase();
- if(!snap.exists()){
-   await setDoc(r,{uid:user.uid,email:user.email||"",name:user.displayName||"",photoURL:user.photoURL||"",blocked:false,admin:owner,owner:owner,createdAt:serverTimestamp()});
- }else if(owner){
-   const d=snap.data()||{};
-   if(d.owner!==true || d.admin!==true) await updateDoc(r,{owner:true,admin:true});
- }
+ if(!snap.exists()) await setDoc(r,{uid:user.uid,email:user.email||"",name:user.displayName||"",photoURL:user.photoURL||"",blocked:false,createdAt:serverTimestamp()});
  return (await getDoc(r)).data();
 }
 async function loadPublicApps(){
@@ -174,12 +154,9 @@ window.downloadApp=async id=>{
    await updateDoc(doc(db,"apps",id),{downloads:increment(1)});
  }catch(e){alert("تعذر بدء التحميل.");}
 };
-
 window.startGoogleLogin=async()=>{
  status("جاري فتح تسجيل الدخول باستخدام Google…");
  try{
-   // GitHub Pages + Firebase Auth: popup avoids the cross-origin storage
-   // issue that can break signInWithRedirect in modern browsers.
    const result=await signInWithPopup(auth,provider);
    if(result?.user) status("تم تسجيل الدخول بالحساب: "+(result.user.email||""));
  }catch(e){
@@ -210,30 +187,23 @@ window.signOutLocal=async()=>{
   status("تم تسجيل الخروج بنجاح.");
  }catch(e){ console.error(e); status("تعذر تسجيل الخروج: "+(e.message||"خطأ غير معروف")); if(btn) btn.disabled=false; }
 };
-
 function renderUser(user,data){
  $("logoutFab").classList.remove("hidden");
  $("userBox").classList.add("show");
  $("userEmail").textContent=(user.displayName||"")+" — "+user.email;
- isOwner=(user.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase();
- isAdmin=isOwner || data?.admin===true;
-
- // بعد تسجيل الدخول نخفي واجهة تسجيل الدخول بالكامل.
+ isAdmin=(user.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
  $("account").classList.add("hidden");
  $("accountNav").classList.add("hidden");
-
  $("adminBadge").classList.toggle("hidden",!isAdmin);
  $("upload").classList.toggle("hidden",!user||data?.blocked===true);
  $("uploadFab").classList.toggle("show",!!user&&data?.blocked!==true);
  $("myAppsSection").classList.toggle("hidden",!user);
  $("admin").classList.toggle("hidden",!isAdmin);
-
  if(data?.blocked){
    $("uploadStatus").textContent="هذا الحساب محظور من رفع التطبيقات.";
    status("الحساب محظور. يمكنك التواصل مع الإدارة.");
  }
 }
-
 async function loadMyApps(){
  if(!currentUser)return;
  const snap=await getDocs(query(collection(db,"apps"),where("ownerId","==",currentUser.uid)));
@@ -244,7 +214,6 @@ async function loadMyApps(){
    <div class="app-meta">${dateText(a.createdAt)}</div>
  </div>`).join(""):'<div class="empty">لم ترفع أي تطبيق بعد.</div>';
 }
-
 async function loadAdmin(){
  if(!isAdmin)return;
  const [appsSnap,usersSnap]=await Promise.all([getDocs(collection(db,"apps")),getDocs(collection(db,"users"))]);
@@ -254,73 +223,24 @@ async function loadAdmin(){
    <div class="row-top"><strong>${esc(a.name)}</strong><span class="tag ${esc(a.status)}">${esc(a.status)}</span></div>
    <small>المالك: ${esc(a.ownerEmail||"")} · ${esc(a.category||"")}</small>
    <div class="actions">
-    ${a.apkUrl?`<button class="btn primary" onclick="testDownloadApp('${a.id}')">تنزيل التطبيق</button>`:""}
     ${a.status!=="approved"?`<button class="btn success" onclick="setAppStatus('${a.id}','approved')">موافقة</button>`:""}
     ${a.status!=="rejected"?`<button class="btn danger" onclick="setAppStatus('${a.id}','rejected')">رفض</button>`:""}
     <button class="btn ghost" onclick="deleteAppAdmin('${a.id}')">حذف</button>
    </div>
  </div>`).join(""):'<div class="empty">لا توجد طلبات.</div>';
- $("adminUsers").innerHTML=users.length?users.map(u=>{
-   const email=(u.email||"").toLowerCase(), owner=email===OWNER_EMAIL.toLowerCase(), admin=owner||u.admin===true;
-   return `<div class="row">
-   <div class="row-top"><strong>${esc(u.name||"بدون اسم")}</strong><span class="tag">${owner?"OWNER":admin?"ADMIN":u.blocked?"محظور":"نشط"}</span></div>
+ $("adminUsers").innerHTML=users.length?users.map(u=>`<div class="row">
+   <div class="row-top"><strong>${esc(u.name||"بدون اسم")}</strong><span class="tag">${u.blocked?"محظور":"نشط"}</span></div>
    <small>${esc(u.email||"")}</small>
-   <div class="actions">
-    ${owner?`<span class="muted">حساب المالك — لا يمكن حظره أو حذفه أو إزالة صلاحياته</span>`:isOwner?`
-      <button class="btn ${admin?"ghost":"success"}" onclick="setAdmin('${u.id}',${!admin})">${admin?"إزالة الأدمن":"تعيين كأدمن"}</button>
-      <button class="btn ${u.blocked?"success":"danger"}" onclick="toggleBlock('${u.id}',${!u.blocked})">${u.blocked?"إلغاء الحظر":"حظر الحساب"}</button>
-      <button class="btn danger" onclick="deleteUserAdmin('${u.id}')">حذف الحساب</button>`:`<span class='muted'>إدارة الحسابات متاحة للـ OWNER فقط</span>`}
-   </div>
- </div>`;
- }).join(""):'<div class="empty">لا توجد حسابات.</div>';
+   <div class="actions">${u.email?.toLowerCase()!==ADMIN_EMAIL.toLowerCase()?`<button class="btn ${u.blocked?"success":"danger"}" onclick="toggleBlock('${u.id}',${!u.blocked})">${u.blocked?"إلغاء الحظر":"حظر الحساب"}</button>`:"<span class='muted'>حساب الإدارة</span>"}</div>
+ </div>`).join(""):'<div class="empty">لا توجد حسابات.</div>';
 }
-
-window.testDownloadApp=async id=>{
- if(!isAdmin)return;
- try{
-   const s=await getDoc(doc(db,"apps",id));
-   if(!s.exists())return;
-   const a=s.data();
-   if(!a.apkUrl){alert("لا يوجد ملف APK لهذا التطبيق.");return;}
-   window.open(a.apkUrl,"_blank","noopener");
- }catch(e){
-   alert("تعذر فتح ملف التطبيق: "+(e.message||"خطأ غير معروف"));
- }
-};
-
 window.setAppStatus=async(id,newStatus)=>{
  if(!isAdmin)return;
  try{await updateDoc(doc(db,"apps",id),{status:newStatus,reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.email});await loadAdmin();await loadPublicApps();await loadMyApps();}
  catch(e){alert("تعذر تحديث حالة التطبيق: "+e.message);}
 };
-
-window.setAdmin=async(uid,makeAdmin)=>{
- if(!isOwner)return;
- try{
-   const s=await getDoc(doc(db,"users",uid));
-   if(!s.exists())return;
-   const u=s.data()||{};
-   if((u.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase())return;
-   await updateDoc(doc(db,"users",uid),{admin:!!makeAdmin,owner:false});
-   await loadAdmin();
- }catch(e){alert("تعذر تغيير صلاحية الأدمن: "+e.message);}
-};
-window.deleteUserAdmin=async uid=>{
- if(!isOwner)return;
- if(uid===currentUser?.uid)return;
- try{
-   const s=await getDoc(doc(db,"users",uid));
-   if(!s.exists())return;
-   const u=s.data()||{};
-   if((u.email||"").toLowerCase()===OWNER_EMAIL.toLowerCase())return;
-   if(!confirm("هل تريد حذف حساب هذا المستخدم من قاعدة بيانات المتجر؟"))return;
-   await deleteDoc(doc(db,"users",uid));
-   await loadAdmin();
- }catch(e){alert("تعذر حذف الحساب: "+e.message);}
-};
-
 window.toggleBlock=async(uid,blocked)=>{
- if(!isOwner)return;
+ if(!isAdmin)return;
  try{await updateDoc(doc(db,"users",uid),{blocked});await loadAdmin();}
  catch(e){alert("تعذر تغيير حالة الحساب: "+e.message);}
 };
@@ -333,14 +253,12 @@ window.deleteAppAdmin=async id=>{
    await deleteDoc(doc(db,"apps",id)); await loadAdmin(); await loadPublicApps();
  }catch(e){alert("تعذر حذف التطبيق: "+e.message);}
 };
-
 window.openUpload=()=>{
   const section=$("upload");
   if(!section || section.classList.contains("hidden")) return;
   section.scrollIntoView({behavior:"smooth",block:"start"});
   setTimeout(()=>$("appName")?.focus(),450);
 };
-
 $("uploadForm").addEventListener("submit",async ev=>{
  ev.preventDefault();
  if(!currentUser){alert("سجّل الدخول أولًا.");return;}
@@ -384,7 +302,6 @@ $("uploadForm").addEventListener("submit",async ev=>{
  }catch(e){console.error(e);status("تعذر رفع التطبيق: "+(e.message||"تحقق من إعدادات Firebase والقواعد."),"uploadStatus");}
  finally{btn.disabled=false;}
 });
-
 getRedirectResult(auth).then(result=>{
   if(result?.user) status("تم تسجيل الدخول.");
 }).catch(e=>{
@@ -393,7 +310,6 @@ getRedirectResult(auth).then(result=>{
   const message=e?.message||"تعذر إكمال تسجيل الدخول";
   status("خطأ Google: "+code+" — "+message);
 });
-
 onAuthStateChanged(auth,async user=>{
  currentUser=user;
  if(!user){
@@ -409,10 +325,8 @@ onAuthStateChanged(auth,async user=>{
    return;
  }
  try{
-   // إظهار حالة تسجيل الدخول فورًا؛ لا نجعل Firestore يمنع ظهور الحساب.
    renderUser(user,{blocked:false});
    status("تم تسجيل الدخول بالحساب: "+user.email);
-
    try{
      const profile=await ensureProfile(user);
      renderUser(user,profile);
