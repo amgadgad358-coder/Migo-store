@@ -113,8 +113,9 @@ footer{text-align:center;color:#697482;padding:35px 20px;border-top:1px solid #1
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,addDoc,getDocs,updateDoc,deleteDoc,query,where,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const SUPABASE_URL="https://htxrcnnnwieljcwtehja.supabase.co";
+const SUPABASE_URL="https://htxrcnnnwieljctweja.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_sjeYQmO6nHfw5Z9ksWCesQ_OiBk0p2Y";
 const SUPABASE_BUCKET="apps";
 
@@ -128,6 +129,7 @@ const firebaseConfig={
  measurementId:"G-SMNL93EJSE"
 };
 const ADMIN_EMAIL="amgadgad358@gmail.com";
+const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const provider=new GoogleAuthProvider(); provider.setCustomParameters({prompt:"select_account"});
 setPersistence(auth,browserLocalPersistence).catch(console.error);
@@ -169,6 +171,8 @@ window.downloadApp=async id=>{
 window.startGoogleLogin=async()=>{
  status("جاري فتح تسجيل الدخول باستخدام Google…");
  try{
+   // GitHub Pages + Firebase Auth: popup avoids the cross-origin storage
+   // issue that can break signInWithRedirect in modern browsers.
    const result=await signInWithPopup(auth,provider);
    if(result?.user) status("تم تسجيل الدخول بالحساب: "+(result.user.email||""));
  }catch(e){
@@ -205,6 +209,8 @@ function renderUser(user,data){
  $("userBox").classList.add("show");
  $("userEmail").textContent=(user.displayName||"")+" — "+user.email;
  isAdmin=(user.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase();
+
+ // بعد تسجيل الدخول نخفي واجهة تسجيل الدخول بالكامل.
  $("account").classList.add("hidden");
  $("accountNav").classList.add("hidden");
 
@@ -240,6 +246,7 @@ async function loadAdmin(){
    <div class="row-top"><strong>${esc(a.name)}</strong><span class="tag ${esc(a.status)}">${esc(a.status)}</span></div>
    <small>المالك: ${esc(a.ownerEmail||"")} · ${esc(a.category||"")}</small>
    <div class="actions">
+    ${a.apkUrl?`<button class="btn primary" onclick="testDownloadApp('${a.id}')">تنزيل التطبيق</button>`:""}
     ${a.status!=="approved"?`<button class="btn success" onclick="setAppStatus('${a.id}','approved')">موافقة</button>`:""}
     ${a.status!=="rejected"?`<button class="btn danger" onclick="setAppStatus('${a.id}','rejected')">رفض</button>`:""}
     <button class="btn ghost" onclick="deleteAppAdmin('${a.id}')">حذف</button>
@@ -251,6 +258,19 @@ async function loadAdmin(){
    <div class="actions">${u.email?.toLowerCase()!==ADMIN_EMAIL.toLowerCase()?`<button class="btn ${u.blocked?"success":"danger"}" onclick="toggleBlock('${u.id}',${!u.blocked})">${u.blocked?"إلغاء الحظر":"حظر الحساب"}</button>`:"<span class='muted'>حساب الإدارة</span>"}</div>
  </div>`).join(""):'<div class="empty">لا توجد حسابات.</div>';
 }
+
+window.testDownloadApp=async id=>{
+ if(!isAdmin)return;
+ try{
+   const s=await getDoc(doc(db,"apps",id));
+   if(!s.exists())return;
+   const a=s.data();
+   if(!a.apkUrl){alert("لا يوجد ملف APK لهذا التطبيق.");return;}
+   window.open(a.apkUrl,"_blank","noopener");
+ }catch(e){
+   alert("تعذر فتح ملف التطبيق: "+(e.message||"خطأ غير معروف"));
+ }
+};
 
 window.setAppStatus=async(id,newStatus)=>{
  if(!isAdmin)return;
@@ -296,34 +316,21 @@ $("uploadForm").addEventListener("submit",async ev=>{
    const iconPath=`${currentUser.uid}/${id}/icon-${Date.now()}.${(icon.name.split(".").pop()||"png")}`;
    const apkPath=`${currentUser.uid}/${id}/app-${Date.now()}.apk`;
    async function uploadOne(path,file,start,end){
-     const encodedPath=path.split("/").map(encodeURIComponent).join("/");
-     const url=SUPABASE_URL+"/storage/v1/object/"+SUPABASE_BUCKET+"/"+encodedPath;
-     let response;
-     try{
-       response=await fetch(url,{
-         method:"POST",
-         mode:"cors",
-         credentials:"omit",
-         headers:{
-           "apikey":SUPABASE_ANON_KEY,
-           "Content-Type":file.type||"application/octet-stream",
-           "x-upsert":"false"
-         },
-         body:file
+     const {error}=await supabase.storage
+       .from(SUPABASE_BUCKET)
+       .upload(path,file,{
+         cacheControl:"3600",
+         contentType:file.type||"application/octet-stream",
+         upsert:false
        });
-     }catch(networkError){
-       throw new Error("فشل الاتصال بـ Supabase. تأكد من Project URL وStorage/CORS وإعدادات الشبكة.");
-     }
-     if(!response.ok){
-       let detail="";
-       try{
-         const text=await response.text();
-         try{const j=JSON.parse(text);detail=j.message||j.error_description||j.error||text;}catch(_){detail=text;}
-       }catch(_){}
-       throw new Error("Supabase Storage "+response.status+(detail?": "+detail:""));
+     if(error){
+       console.error("Supabase Storage error:",error);
+       throw new Error(error.message||error.error||"تعذر رفع الملف إلى Supabase");
      }
      $("uploadProgress").style.width=end+"%";
-     return SUPABASE_URL+"/storage/v1/object/public/"+SUPABASE_BUCKET+"/"+encodedPath;
+     const {data}=supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
+     if(!data?.publicUrl) throw new Error("تعذر إنشاء رابط الملف العام.");
+     return data.publicUrl;
    }
    const iconUrl=await uploadOne(iconPath,icon,0,25);
    const apkUrl=await uploadOne(apkPath,apk,25,100);
@@ -360,6 +367,7 @@ onAuthStateChanged(auth,async user=>{
    return;
  }
  try{
+   // إظهار حالة تسجيل الدخول فورًا؛ لا نجعل Firestore يمنع ظهور الحساب.
    renderUser(user,{blocked:false});
    status("تم تسجيل الدخول بالحساب: "+user.email);
 
